@@ -26,7 +26,7 @@ class Lexer
 {
     private:
         queue<Token> tokens;
-        bool isAplha(char c);
+        bool isAlpha(char c);
     public:
         Lexer();
         Lexer(string filePath);
