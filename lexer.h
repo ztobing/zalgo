@@ -2,18 +2,18 @@
 #define LEXER_H
 
 // Define tokens
-#define T_NULL "T_NULL"
-#define T_STR "T_STR"
-#define T_INT "T_INT"
-#define T_ADD "T_ADD"
-#define T_SUB "T_SUB"
-#define T_MUL "T_MUL"
-#define T_DIV "T_DIV"
-#define T_LPAREN "T_LPAREN"
-#define T_RPAREN "T_RPAREN"
-#define T_VAR "T_VAR"
-#define T_FUNC "T_FUNC"
-#define T_EOF "T_EOF"
+#define T_NULL "NULL"
+#define T_STR "STR"
+#define T_INT "INT"
+#define T_ADD "ADD"
+#define T_SUB "SUB"
+#define T_MUL "MUL"
+#define T_DIV "DIV"
+#define T_LPAREN "LPAREN"
+#define T_RPAREN "RPAREN"
+#define T_VAR "VAR"
+#define T_FUNC "FUNC"
+#define T_EOF "EOF"
 
 #include <iostream>
 #include <queue>
