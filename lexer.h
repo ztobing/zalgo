@@ -69,18 +69,18 @@ Lexer::Lexer(string filePath)
         {
             cout << "Checking " << input[i] << endl;
 
-            if (isTagOpened && expectedTokenType == T_STR)
-            {
-                token += input[i];
-                continue;
-            }
-            else if (isTagOpened && input[i] == '"')
+            if (isTagOpened && input[i] == '"')
             {
                 cout << "STRING CLOSE" << endl;
                 tokens.push(Token(T_STR, token));
                 isTagOpened = false;
                 expectedTokenType = T_NULL;
                 token = "";
+            }
+            else if (isTagOpened && expectedTokenType == T_STR)
+            {
+                token += input[i];
+                continue;
             }
 
             switch(input[i])
