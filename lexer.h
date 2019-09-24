@@ -58,8 +58,8 @@ Lexer::Lexer(string filePath)
     {
         fStream >> input;
         
-        // mindfuck
-        if (expectedTokenType == T_STR)
+        // Add space after every iteration if token is string
+        if (isTagOpened)
         {
             token += " ";
         }
@@ -67,62 +67,59 @@ Lexer::Lexer(string filePath)
         // Check every char on string and tokenize it
         for (int i = 0; i < input.length(); i++)
         {
-            cout << "Checking " << input[i] << endl;
+            // cout << "Checking " << input[i] << endl;
 
-            if (isTagOpened && input[i] == '"')
+            if (isTagOpened)
             {
-                cout << "STRING CLOSE" << endl;
-                tokens.push(Token(T_STR, token));
-                isTagOpened = false;
-                expectedTokenType = T_NULL;
-                token = "";
+                if (input[i] == '"')
+                {
+                    // cout << "STRING CLOSE" << endl;
+                    tokens.push(Token(T_STR, token));
+                    isTagOpened = false;
+                    expectedTokenType = T_NULL;
+                    token = "";
+                }
+                else
+                {
+                    token += input[i];
+                    continue;
+                }
             }
-            else if (isTagOpened && expectedTokenType == T_STR)
+            else
             {
-                token += input[i];
-                continue;
-            }
-
-            switch(input[i])
-            {
-                case '"':
-                    if (!isTagOpened)
-                    {
-                        cout << "STRING OPEN" << endl;
+                switch(input[i])
+                {
+                    case '"':
+                        // cout << "STRING OPEN" << endl;
                         expectedTokenType = T_STR;
                         isTagOpened = true;
-                    }
-                    break;
-                case '(':
-                    tokens.push(Token(T_LPAREN));
-                    break;
-                case ')':
-                    tokens.push(Token(T_RPAREN));
-                    break;
-                case '*':
-                    tokens.push(Token(T_MUL));
-                    break;
-                case '/':
-                    tokens.push(Token(T_ADD));
-                    break;
-                case '+':
-                    tokens.push(Token(T_ADD));
-                    break;
-                case '-':
-                    tokens.push(Token(T_SUB));
-                    break;
+                        break;
+                    case '(':
+                        tokens.push(Token(T_LPAREN));
+                        break;
+                    case ')':
+                        tokens.push(Token(T_RPAREN));
+                        break;
+                    case '*':
+                        tokens.push(Token(T_MUL));
+                        break;
+                    case '/':
+                        tokens.push(Token(T_ADD));
+                        break;
+                    case '+':
+                        tokens.push(Token(T_ADD));
+                        break;
+                    case '-':
+                        tokens.push(Token(T_SUB));
+                        break;
+                }
             }
-        }
-
-        // Reset variables if expected token is not string
-        if (expectedTokenType != T_STR)
-        {
-            token = "";
-            expectedTokenType = T_NULL;
         }
     }
 
-    for (int i = 0; i < tokens.size() + 1; i++)
+    cout << tokens.size() << endl;
+
+    while (!tokens.empty())
     {
         Token token = tokens.front();
         cout << "Token(TYPE=" + token.tokenType + ", VALUE=" + token.value + ")" << endl;
