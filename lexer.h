@@ -11,6 +11,8 @@
 #define T_DIV "T_DIV"
 #define T_LPAREN "T_LPAREN"
 #define T_RPAREN "T_RPAREN"
+#define T_VAR "T_VAR"
+#define T_FUNC "T_FUNC"
 #define T_EOF "T_EOF"
 
 #include <iostream>
