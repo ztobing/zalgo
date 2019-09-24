@@ -80,6 +80,7 @@ Lexer::Lexer(string filePath)
                     isTagOpened = false;
                     expectedTokenType = T_NULL;
                     token = "";
+                    continue;
                 }
                 else
                 {
@@ -87,33 +88,31 @@ Lexer::Lexer(string filePath)
                     continue;
                 }
             }
-            else
+
+            switch(input[i])
             {
-                switch(input[i])
-                {
-                    case '"':
-                        expectedTokenType = T_STR;
-                        isTagOpened = true;
-                        break;
-                    case '(':
-                        tokens.push(Token(T_LPAREN));
-                        break;
-                    case ')':
-                        tokens.push(Token(T_RPAREN));
-                        break;
-                    case '*':
-                        tokens.push(Token(T_MUL));
-                        break;
-                    case '/':
-                        tokens.push(Token(T_ADD));
-                        break;
-                    case '+':
-                        tokens.push(Token(T_ADD));
-                        break;
-                    case '-':
-                        tokens.push(Token(T_SUB));
-                        break;
-                }
+                case '"':
+                    expectedTokenType = T_STR;
+                    isTagOpened = true;
+                    break;
+                case '(':
+                    tokens.push(Token(T_LPAREN));
+                    break;
+                case ')':
+                    tokens.push(Token(T_RPAREN));
+                    break;
+                case '*':
+                    tokens.push(Token(T_MUL));
+                    break;
+                case '/':
+                    tokens.push(Token(T_ADD));
+                    break;
+                case '+':
+                    tokens.push(Token(T_ADD));
+                    break;
+                case '-':
+                    tokens.push(Token(T_SUB));
+                    break;
             }
         }
     }
