@@ -26,6 +26,7 @@ class Lexer
 {
     private:
         queue<Token> tokens;
+        bool isAplha(char c);
     public:
         Lexer();
         Lexer(string filePath);
@@ -131,6 +132,11 @@ Token Lexer::next()
     Token token = tokens.front();
     tokens.pop();
     return token;
+}
+
+bool Lexer::isAlpha(char c)
+{
+    return (c >= 65 && c <= 90) || (c >= 97 && c <= 122);
 }
 
 #endif
