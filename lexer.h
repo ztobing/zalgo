@@ -69,13 +69,11 @@ Lexer::Lexer(string filePath)
         // Check every char on string and tokenize it
         for (int i = 0; i < input.length(); i++)
         {
-            // cout << "Checking " << input[i] << endl;
 
             if (isTagOpened)
             {
                 if (input[i] == '"')
                 {
-                    // cout << "STRING CLOSE" << endl;
                     tokens.push(Token(T_STR, token));
                     isTagOpened = false;
                     expectedTokenType = T_NULL;
@@ -92,7 +90,6 @@ Lexer::Lexer(string filePath)
                 switch(input[i])
                 {
                     case '"':
-                        // cout << "STRING OPEN" << endl;
                         expectedTokenType = T_STR;
                         isTagOpened = true;
                         break;
