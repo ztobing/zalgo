@@ -27,6 +27,7 @@ class Lexer
     private:
         queue<Token> tokens;
         bool isAlpha(char c);
+        bool isNumber(char c);
     public:
         Lexer();
         Lexer(string filePath);
@@ -137,6 +138,11 @@ Token Lexer::next()
 bool Lexer::isAlpha(char c)
 {
     return (c >= 65 && c <= 90) || (c >= 97 && c <= 122);
+}
+
+bool Lexer::isNumber(char c)
+{
+    return c >= 48 && c <= 57;
 }
 
 #endif
