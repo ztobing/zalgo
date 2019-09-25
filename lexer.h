@@ -91,7 +91,7 @@ Lexer::Lexer(string filePath)
         while (!ss.eof())
         {
             ss >> input;
-            
+
             if (input == "if")
             {
                 if (currentLineTokens.size() == 0) currentLineTokens.push_back(Token(T_IF));
@@ -187,102 +187,3 @@ void Lexer::throwException(Exception e)
 }
 
 #endif
-
-    //     // Add space after every iteration if token is string
-    //     if (isTagOpened)
-    //     {
-    //         token += " ";
-    //     }
-
-    //     // Check every char on string and tokenize it
-    //     for (int i = 0; i < input.length(); i++)
-    //     {
-    //         // Parse expression
-    //         if (expectedTokenType == T_EXPR)
-    //         {
-                
-    //         }
-
-    //         // Parse if
-    //         if (expectedTokenType == T_NULL and input[i] == 'i' and input[i + 1] == 'f' and input[i + 2] == ' ')
-    //         {
-    //             tokens.push(Token(T_IF));
-    //             expectedTokenType = T_EXPR;
-    //             i += 2;
-    //             continue;
-    //         }
-
-    //         // Parse string
-    //         if (isTagOpened)
-    //         {
-    //             if (input[i] == '"')
-    //             {
-    //                 tokens.push(Token(T_STR, token));
-    //                 isTagOpened = false;
-    //                 expectedTokenType = T_NULL;
-    //                 token = "";
-    //                 continue;
-    //             }
-    //             else
-    //             {
-    //                 token += input[i];
-    //                 continue;
-    //             }
-    //         }
-
-    //         // Parse int
-    //         if (isNumber(input[i]) && expectedTokenType == T_NULL)
-    //         {
-    //             expectedTokenType = T_INT;
-    //         }
-
-    //         if (expectedTokenType == T_INT)
-    //         {
-    //             if (isNumber(input[i]))
-    //             {
-    //                 token += input[i];
-    //             }
-    //             if (isNumber(input[i + 1]))
-    //             {
-    //                 continue;
-    //             }
-    //             else
-    //             {
-    //                 expectedTokenType = T_NULL;
-    //                 tokens.push(Token(T_INT, token));
-    //                 token = "";
-    //                 continue;
-    //             }
-    //         }
-
-    //         // Parse characters
-    //         switch(input[i])
-    //         {
-    //             case '"':
-    //                 expectedTokenType = T_STR;
-    //                 isTagOpened = true;
-    //                 break;
-    //             case '(':
-    //                 tokens.push(Token(T_LPAREN));
-    //                 break;
-    //             case ')':
-    //                 tokens.push(Token(T_RPAREN));
-    //                 break;
-    //             case '*':
-    //                 tokens.push(Token(T_MUL));
-    //                 break;
-    //             case '/':
-    //                 tokens.push(Token(T_ADD));
-    //                 break;
-    //             case '+':
-    //                 tokens.push(Token(T_ADD));
-    //                 break;
-    //             case '-':
-    //                 tokens.push(Token(T_SUB));
-    //                 break;
-    //         }
-    //     }
-    // }
-
-    // cout << tokens.size() << endl;
-
