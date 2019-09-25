@@ -146,6 +146,40 @@ Lexer::Lexer(string filePath)
                     }
                 }
             }
+
+            // Symbols parsing
+            for (int i = 0; i < input.length(); i++)
+            {
+                switch(input[i])
+                {
+                    case '(':
+                        currentLineTokens.push_back(Token(T_LPAREN));
+                        break;
+                    case ')':
+                        currentLineTokens.push_back(Token(T_RPAREN));
+                        break;
+                    case '=':
+                        if (input[i + 1] == '=')
+                        {
+                            currentLineTokens.push_back(Token(T_EEQUALS));
+                            i++;
+                        }
+                        else currentLineTokens.push_back(Token(T_EQUALS));
+                        break;
+                    case '*':
+                        currentLineTokens.push_back(Token(T_MUL));
+                        break;
+                    case '/':
+                        currentLineTokens.push_back(Token(T_DIV));
+                        break;
+                    case '+':
+                        currentLineTokens.push_back(Token(T_ADD));
+                        break;
+                    case '-':
+                        currentLineTokens.push_back(Token(T_SUB));
+                        break;
+                }
+            }
         }
 
         // Empty validated tokens
