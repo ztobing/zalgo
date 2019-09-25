@@ -3,22 +3,28 @@
 
 // Define tokens
 #define T_NULL "NULL"
+
 #define T_STR "STR"
 #define T_INT "INT"
+
 #define T_ADD "ADD"
 #define T_SUB "SUB"
 #define T_MUL "MUL"
 #define T_DIV "DIV"
+
 #define T_IF "IF"
-#define T_EXPR "EXPR"
+#define T_ELSE "ELSE"
 #define T_WHILE "WHILE"
 #define T_FOR "FOR"
+#define T_EXPR "EXPR"
+
 #define T_EQUALS "EQUALS"
 #define T_EEQUALS "EEQUALS"
 #define T_GREATER "GREATER"
 #define T_LESS "LESS"
 #define T_GREATEREQUALS "GREATEREQUALS"
 #define T_LESSEQUALS "LESSEQUALS"
+
 #define T_LPAREN "LPAREN"
 #define T_RPAREN "RPAREN"
 #define T_VAR "VAR"
@@ -71,9 +77,46 @@ Lexer::Lexer(string filePath)
     while (!fStream.eof())
     {
         fStream >> input;
-        
+        if (input == "if")
+        {
+            tokens.push(Token(T_IF));
+            continue;
+        }
+        else if (input == "else")
+        {
+            tokens.push(Token(T_ELSE));
+            continue;
+        }
+        else if (input == "for")
+        {
+            tokens.push(Token(T_FOR));
+            continue;
+        }
+        else if (input == "while")
+        {
+            tokens.push(Token(T_WHILE));
+            continue;
+        }
 
+        if (isAlpha(input[0]))
+        {
+            tokens.push(Token(T_VAR, input));
+            continue;
+        }
+        
+        // for (int i = 0; i < input.length(); i++)
+        // {
+
+        // }
     }
+
+    while (!tokens.empty())
+    {
+        Token token = tokens.front();
+        cout << "Token(TYPE=" + token.tokenType + ", VALUE=" + token.value + ")" << endl;
+        tokens.pop();
+    }
+}
 
 Token Lexer::next()
 {
@@ -192,9 +235,3 @@ bool Lexer::isNumber(char c)
 
     // cout << tokens.size() << endl;
 
-    // while (!tokens.empty())
-    // {
-    //     Token token = tokens.front();
-    //     cout << "Token(TYPE=" + token.tokenType + ", VALUE=" + token.value + ")" << endl;
-    //     tokens.pop();
-    // }
