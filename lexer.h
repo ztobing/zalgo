@@ -55,7 +55,7 @@ Lexer::Lexer(string filePath)
     string token;
     string expectedTokenType = T_NULL;
 
-    // Shit needed for string tokenizer
+    // String tokenizer variables
     bool isTagOpened = false;
 
     while (!fStream.eof())
@@ -72,6 +72,7 @@ Lexer::Lexer(string filePath)
         for (int i = 0; i < input.length(); i++)
         {
 
+            // Parse string
             if (isTagOpened)
             {
                 if (input[i] == '"')
@@ -89,6 +90,32 @@ Lexer::Lexer(string filePath)
                 }
             }
 
+            // Parse int
+            if (isNumber(input[i]) && expectedTokenType == T_NULL)
+            {
+                expectedTokenType = T_INT;
+            }
+
+            if (expectedTokenType == T_INT)
+            {
+                if (isNumber(input[i]))
+                {
+                    token += input[i];
+                }
+                if (isNumber(input[i + 1]))
+                {
+                    continue;
+                }
+                else
+                {
+                    expectedTokenType = T_NULL;
+                    tokens.push(Token(T_INT, token));
+                    token = "";
+                    continue;
+                }
+            }
+
+            // Parse characters
             switch(input[i])
             {
                 case '"':
