@@ -35,6 +35,7 @@
 #include <iostream>
 #include <queue>
 #include <fstream>
+#include <sstream>
 #include "token.h"
 
 using namespace std;
@@ -68,67 +69,74 @@ Lexer::Lexer(string filePath)
     }
 
     // Tokenize input
-    string input;
+    string inputLine;
     string token;
     string expectedTokenType = T_NULL;
 
     // String tokenizer variables
     bool isTagOpened = false;
 
-    while (!fStream.eof())
+    while (getline(fStream, inputLine))
     {
-        fStream >> input;
-        if (input == "if")
-        {
-            tokens.push(Token(T_IF));
-            continue;
-        }
-        else if (input == "else")
-        {
-            tokens.push(Token(T_ELSE));
-            continue;
-        }
-        else if (input == "for")
-        {
-            tokens.push(Token(T_FOR));
-            continue;
-        }
-        else if (input == "while")
-        {
-            tokens.push(Token(T_WHILE));
-            continue;
-        }
+        stringstream ss(inputLine);
+        string input;
 
-        if (isAlpha(input[0]))  // If it detect alphabet first in line
+        while (!ss.eof())
         {
-            tokens.push(Token(T_VAR, input));   // Parse as variable
-            continue;
-        }
-        else if (isNumber(input[0]))    // If it detect integer first in line
-        {
-            if (input[1] == '.')    // Check if its a float by checking if the char after the first is .
+            ss >> input;
+            
+            if (input == "if")
             {
-                tokens.push(Token(T_FLOAT, input));     // Parse as float
+                tokens.push(Token(T_IF));
                 continue;
             }
-            else
+            else if (input == "else")
             {
-                bool ST00PID = false;
-                for (int i = 0; i < input.size(); i++)
+                tokens.push(Token(T_ELSE));
+                continue;
+            }
+            else if (input == "for")
+            {
+                tokens.push(Token(T_FOR));
+                continue;
+            }
+            else if (input == "while")
+            {
+                tokens.push(Token(T_WHILE));
+                continue;
+            }
+
+            if (isAlpha(input[0]))  // If it detect alphabet first in line
+            {
+                tokens.push(Token(T_VAR, input));   // Parse as variable
+                continue;
+            }
+            else if (isNumber(input[0]))    // If it detect integer first in line
+            {
+                if (input[1] == '.')    // Check if its a float by checking if the char after the first is .
                 {
-                    if (isAlpha(input[i]))  // if it found alphabet after integer that mean UR ST00PID 
-                    {
-                        ST00PID = true;
-                        break;
-                    }
+                    tokens.push(Token(T_FLOAT, input));     // Parse as float
+                    continue;
                 }
-                if (!ST00PID)   // If smart boi
+                else
                 {
-                    tokens.push(Token(T_INT, input));   // Parse as int
+                    bool ST00PID = false;
+                    for (int i = 0; i < input.size(); i++)
+                    {
+                        if (isAlpha(input[i]))  // if it found alphabet after integer that mean UR ST00PID 
+                        {
+                            ST00PID = true;
+                            break;
+                        }
+                    }
+                    if (!ST00PID)   // If smart boi
+                    {
+                        tokens.push(Token(T_INT, input));   // Parse as int
+                    }
                 }
             }
         }
-        
+
         // for (int i = 0; i < input.length(); i++)
         // {
 
