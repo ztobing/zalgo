@@ -188,6 +188,8 @@ Lexer::Lexer(string filePath)
             tokens.push(currentLineTokens.front());
             currentLineTokens.pop_front();
         }
+
+        tokens.push(Token(T_NEWLINE));  // Mark newline at the end of a line
     }
 
     while (!tokens.empty())
