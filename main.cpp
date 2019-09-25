@@ -6,7 +6,18 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-    // TODO: Parse command line arguments
-    string x(argv[1]);
-    Lexer l(x);
+    if (argc == 1)
+    {
+        // run in shell mode
+    }
+    else if (argc == 2)
+    {
+        string x(argv[1]);
+        Lexer l(x);
+    }
+    else
+    {
+        cout << "Usage: zalgo [filename]" << endl;
+    }
+    
 }
