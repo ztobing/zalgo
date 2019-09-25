@@ -30,6 +30,7 @@
 #define T_RPAREN "RPAREN"
 #define T_VAR "VAR"
 #define T_FUNC "FUNC"
+#define T_NEWLINE "NEWLINE"
 #define T_EOF "EOF"
 
 #include <iostream>
@@ -80,6 +81,7 @@ Lexer::Lexer(string filePath)
     {
         stringstream ss(inputLine);
         string input;
+        queue<Token> currentLineTokens;
 
         while (!ss.eof())
         {
@@ -87,35 +89,35 @@ Lexer::Lexer(string filePath)
             
             if (input == "if")
             {
-                tokens.push(Token(T_IF));
+                currentLineTokens.push(Token(T_IF));
                 continue;
             }
             else if (input == "else")
             {
-                tokens.push(Token(T_ELSE));
+                currentLineTokens.push(Token(T_ELSE));
                 continue;
             }
             else if (input == "for")
             {
-                tokens.push(Token(T_FOR));
+                currentLineTokens.push(Token(T_FOR));
                 continue;
             }
             else if (input == "while")
             {
-                tokens.push(Token(T_WHILE));
+                currentLineTokens.push(Token(T_WHILE));
                 continue;
             }
 
             if (isAlpha(input[0]))  // If it detect alphabet first in line
             {
-                tokens.push(Token(T_VAR, input));   // Parse as variable
+                currentLineTokens.push(Token(T_VAR, input));   // Parse as variable
                 continue;
             }
             else if (isNumber(input[0]))    // If it detect integer first in line
             {
                 if (input[1] == '.')    // Check if its a float by checking if the char after the first is .
                 {
-                    tokens.push(Token(T_FLOAT, input));     // Parse as float
+                    currentLineTokens.push(Token(T_FLOAT, input));     // Parse as float
                     continue;
                 }
                 else
@@ -131,10 +133,17 @@ Lexer::Lexer(string filePath)
                     }
                     if (!ST00PID)   // If smart boi
                     {
-                        tokens.push(Token(T_INT, input));   // Parse as int
+                        currentLineTokens.push(Token(T_INT, input));   // Parse as int
                     }
                 }
             }
+        }
+
+        // Empty validated tokens
+        while (!currentLineTokens.empty())
+        {
+            tokens.push(currentLineTokens.front());
+            currentLineTokens.pop();
         }
 
         // for (int i = 0; i < input.length(); i++)
