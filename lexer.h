@@ -136,12 +136,13 @@ Lexer::Lexer(string filePath)
                         if (isAlpha(input[i]))  // if it found alphabet after integer that mean UR ST00PID 
                         {
                             ST00PID = true;
-                            break;
+                            throwException(Exception()); // TODO: Change exception type
                         }
                     }
                     if (!ST00PID)   // If smart boi
                     {
                         currentLineTokens.push_back(Token(T_INT, input));   // Parse as int
+                        continue;
                     }
                 }
             }
