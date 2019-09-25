@@ -145,11 +145,6 @@ Lexer::Lexer(string filePath)
             tokens.push(currentLineTokens.front());
             currentLineTokens.pop();
         }
-
-        // for (int i = 0; i < input.length(); i++)
-        // {
-
-        // }
     }
 
     while (!tokens.empty())
