@@ -35,9 +35,13 @@
 
 #include <iostream>
 #include <queue>
+#include <deque>
 #include <fstream>
 #include <sstream>
+
 #include "token.h"
+#include "exceptions/exception.h"
+#include "exceptions/syntaxErrorException.h"
 
 using namespace std;
 
@@ -47,6 +51,7 @@ class Lexer
         queue<Token> tokens;
         bool isAlpha(char c);
         bool isNumber(char c);
+        void throwException(Exception e);
     public:
         Lexer();
         Lexer(string filePath);
@@ -81,7 +86,7 @@ Lexer::Lexer(string filePath)
     {
         stringstream ss(inputLine);
         string input;
-        queue<Token> currentLineTokens;
+        deque<Token> currentLineTokens;
 
         while (!ss.eof())
         {
@@ -89,35 +94,38 @@ Lexer::Lexer(string filePath)
             
             if (input == "if")
             {
-                currentLineTokens.push(Token(T_IF));
+                if (currentLineTokens.size() == 0) currentLineTokens.push_back(Token(T_IF));
+                else throwException(SyntaxErrorException(0, 0)); // TODO: add line and col numbers
                 continue;
             }
             else if (input == "else")
             {
-                currentLineTokens.push(Token(T_ELSE));
+                currentLineTokens.push_back(Token(T_ELSE));
                 continue;
             }
             else if (input == "for")
             {
-                currentLineTokens.push(Token(T_FOR));
+                currentLineTokens.push_back(Token(T_FOR));
                 continue;
             }
             else if (input == "while")
             {
-                currentLineTokens.push(Token(T_WHILE));
+                currentLineTokens.push_back(Token(T_WHILE));
                 continue;
             }
 
             if (isAlpha(input[0]))  // If it detect alphabet first in line
             {
-                currentLineTokens.push(Token(T_VAR, input));   // Parse as variable
+                if (((currentLineTokens.size() != 0) ? currentLineTokens.back().tokenType : T_NULL) != T_VAR)
+                    currentLineTokens.push_back(Token(T_VAR, input));   // Parse as variable
+                else throwException(SyntaxErrorException(0, 0)); // TODO: add line and col numbers
                 continue;
             }
             else if (isNumber(input[0]))    // If it detect integer first in line
             {
                 if (input[1] == '.')    // Check if its a float by checking if the char after the first is .
                 {
-                    currentLineTokens.push(Token(T_FLOAT, input));     // Parse as float
+                    currentLineTokens.push_back(Token(T_FLOAT, input));     // Parse as float
                     continue;
                 }
                 else
@@ -133,7 +141,7 @@ Lexer::Lexer(string filePath)
                     }
                     if (!ST00PID)   // If smart boi
                     {
-                        currentLineTokens.push(Token(T_INT, input));   // Parse as int
+                        currentLineTokens.push_back(Token(T_INT, input));   // Parse as int
                     }
                 }
             }
@@ -143,7 +151,7 @@ Lexer::Lexer(string filePath)
         while (!currentLineTokens.empty())
         {
             tokens.push(currentLineTokens.front());
-            currentLineTokens.pop();
+            currentLineTokens.pop_front();
         }
     }
 
@@ -170,6 +178,12 @@ bool Lexer::isAlpha(char c)
 bool Lexer::isNumber(char c)
 {
     return c >= 48 && c <= 57;
+}
+
+void Lexer::throwException(Exception e)
+{
+    cout << "Exception happened on runtime: " << e.exception << endl << e.description << endl;
+    exit(1);
 }
 
 #endif
