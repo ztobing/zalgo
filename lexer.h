@@ -6,6 +6,7 @@
 
 #define T_STR "STR"
 #define T_INT "INT"
+#define T_FLOAT "FLOAT"
 
 #define T_ADD "ADD"
 #define T_SUB "SUB"
@@ -98,10 +99,34 @@ Lexer::Lexer(string filePath)
             continue;
         }
 
-        if (isAlpha(input[0]))
+        if (isAlpha(input[0]))  // If it detect alphabet first in line
         {
-            tokens.push(Token(T_VAR, input));
+            tokens.push(Token(T_VAR, input));   // Parse as variable
             continue;
+        }
+        else if (isNumber(input[0]))    // If it detect integer first in line
+        {
+            if (input[1] == '.')    // Check if its a float by checking if the char after the first is .
+            {
+                tokens.push(Token(T_FLOAT, input));     // Parse as float
+                continue;
+            }
+            else
+            {
+                bool ST00PID = false;
+                for (int i = 0; i < input.size(); i++)
+                {
+                    if (isAlpha(input[i]))  // if it found alphabet after integer that mean UR ST00PID 
+                    {
+                        ST00PID = true;
+                        break;
+                    }
+                }
+                if (!ST00PID)   // If smart boi
+                {
+                    tokens.push(Token(T_INT, input));   // Parse as int
+                }
+            }
         }
         
         // for (int i = 0; i < input.length(); i++)
