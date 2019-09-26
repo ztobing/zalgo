@@ -92,7 +92,7 @@ Lexer::Lexer(string filePath)
         while (!ss.eof())
         {
             ss >> input;
-            cout << input << endl;
+
             if (input == "if")
             {
                 if (currentLineTokens.size() == 0) currentLineTokens.push_back(Token(T_IF));
