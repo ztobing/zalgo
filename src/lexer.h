@@ -106,6 +106,7 @@ Lexer::Lexer(string filePath)
                 // Pop current line tokens until if token is found
                 while (!currentLineTokens.empty())
                 {
+                    if (currentLineTokens.back().tokenType == T_THEN) break;
                     if (currentLineTokens.back().tokenType != T_IF)
                     {
                         buffer.push_back(currentLineTokens.back());
