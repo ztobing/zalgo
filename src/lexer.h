@@ -158,8 +158,11 @@ Lexer::Lexer(string filePath)
             {
                 if (input[1] == '.')    // Check if its a float by checking if the char after the first is .
                 {
-                    currentLineTokens.push_back(Token(T_FLOAT, input));     // Parse as float
-                    continue;
+                    if (count(begin(input), end(input), '.') == 1)
+                    {
+                        currentLineTokens.push_back(Token(T_FLOAT, input));     // Parse as float
+                        continue;
+                    }
                 }
                 else
                 {
