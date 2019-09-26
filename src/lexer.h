@@ -163,6 +163,7 @@ Lexer::Lexer(string filePath)
                         currentLineTokens.push_back(Token(T_FLOAT, input));     // Parse as float
                         continue;
                     }
+                    throwException(Exception()); // TODO: add exception type
                 }
                 else
                 {
