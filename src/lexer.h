@@ -83,8 +83,13 @@ Lexer::Lexer(string filePath)
     // String tokenizer variables
     bool isTagOpened = false;
 
+    // Line and column number tracking
+    int currentLineNumber = 0;
+    int currentColNumber = 0;
+
     while (getline(fStream, inputLine))
     {
+        currentLineNumber++;
         stringstream ss(inputLine);
         string input;
         deque<Token> currentLineTokens;
@@ -96,7 +101,7 @@ Lexer::Lexer(string filePath)
             if (input == "if")
             {
                 if (currentLineTokens.size() == 0) currentLineTokens.push_back(Token(T_IF));
-                else throwException(SyntaxErrorException(0, 0)); // TODO: add line and col numbers
+                else throwException(SyntaxErrorException(currentLineNumber, 0)); // TODO: add line and col numbers
                 continue;
             }
             else if (input == "then")
@@ -152,7 +157,7 @@ Lexer::Lexer(string filePath)
             {
                 if (((currentLineTokens.size() != 0) ? currentLineTokens.back().tokenType : T_NULL) != T_VAR)
                     currentLineTokens.push_back(Token(T_VAR, input));   // Parse as variable
-                else throwException(SyntaxErrorException(0, 0)); // TODO: add line and col numbers
+                else throwException(SyntaxErrorException(currentLineNumber, 0)); // TODO: add line and col numbers
                 continue;
             }
             else if (isNumber(input[0]))    // If it detect integer first in line
