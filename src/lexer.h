@@ -14,6 +14,7 @@
 #define T_DIV "DIV"
 
 #define T_IF "IF"
+#define T_THEN "THEN"
 #define T_ELSE "ELSE"
 #define T_WHILE "WHILE"
 #define T_FOR "FOR"
@@ -91,11 +92,43 @@ Lexer::Lexer(string filePath)
         while (!ss.eof())
         {
             ss >> input;
-
+            cout << input << endl;
             if (input == "if")
             {
                 if (currentLineTokens.size() == 0) currentLineTokens.push_back(Token(T_IF));
                 else throwException(SyntaxErrorException(0, 0)); // TODO: add line and col numbers
+                continue;
+            }
+            else if (input == "then")
+            {
+                deque<Token> buffer;
+                bool ifTokenFound = false;
+                // Pop current line tokens until if token is found
+                while (!currentLineTokens.empty())
+                {
+                    if (currentLineTokens.back().tokenType != T_IF)
+                    {
+                        buffer.push_back(currentLineTokens.back());
+                        currentLineTokens.pop_back();
+                    }
+                    else
+                    {
+                        ifTokenFound = true;
+                        break;
+                    }
+                }
+
+                if (ifTokenFound)   // Put tokens back to its original place when syntax is validated
+                    {
+                        while (!buffer.empty())
+                        {
+                            currentLineTokens.push_back(buffer.back());
+                            buffer.pop_back();
+                        }
+                        currentLineTokens.push_back(Token(T_THEN));
+                    }
+                else                // Throw exception on syntax error
+                    throwException(Exception()); // TODO: Change exception type
                 continue;
             }
             else if (input == "else")
