@@ -190,6 +190,16 @@ Lexer::Lexer(string filePath)
                 }
             }
 
+            else if (input[0] == '.')   // If detect '.'
+            {
+                if (count(begin(input), end(input), '.') == 1)
+                    {
+                        currentLineTokens.push_back(Token(T_FLOAT, input));     // Parse as float
+                        continue;
+                    }
+                    throwException(Exception()); // TODO: add exception type
+            }
+
             // Symbols parsing
             for (int i = 0; i < input.length(); i++)
             {
