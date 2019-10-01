@@ -8,31 +8,17 @@
 #define T_INT "INT"
 #define T_FLOAT "FLOAT"
 
-#define T_ADD "ADD"
-#define T_SUB "SUB"
-#define T_MUL "MUL"
-#define T_DIV "DIV"
+#define T_OPR "OPR"
+#define T_KWORD "KWORD"
+#define T_BINOP "BINOP"
 
-#define T_IF "IF"
-#define T_THEN "THEN"
-#define T_ELSE "ELSE"
-#define T_WHILE "WHILE"
-#define T_FOR "FOR"
-#define T_EXPR "EXPR"
-
-#define T_EQUALS "EQUALS"
-#define T_EEQUALS "EEQUALS"
-#define T_GREATER "GREATER"
-#define T_LESS "LESS"
-#define T_GREATEREQUALS "GREATEREQUALS"
-#define T_LESSEQUALS "LESSEQUALS"
-
-#define T_LPAREN "LPAREN"
-#define T_RPAREN "RPAREN"
+#define T_SPR "SPR"
+// #define T_LPAREN "LPAREN"
+// #define T_RPAREN "RPAREN"
 #define T_VAR "VAR"
-#define T_FUNC "FUNC"
-#define T_NEWLINE "NEWLINE"
-#define T_EOF "EOF"
+// #define T_FUNC "FUNC"
+// #define T_NEWLINE "NEWLINE"
+// #define T_EOF "EOF"
 
 #include <iostream>
 #include <queue>
@@ -100,7 +86,7 @@ Lexer::Lexer(string filePath)
 
             if (input == "if")
             {
-                if (currentLineTokens.size() == 0) currentLineTokens.push_back(Token(T_IF));
+                if (currentLineTokens.size() == 0) currentLineTokens.push_back(Token(T_KWORD, "IF"));
                 else throwException(SyntaxErrorException(currentLineNumber, 0)); // TODO: add line and col numbers
                 continue;
             }
@@ -111,8 +97,8 @@ Lexer::Lexer(string filePath)
                 // Pop current line tokens until if token is found
                 while (!currentLineTokens.empty())
                 {
-                    if (currentLineTokens.back().tokenType == T_THEN) break;
-                    if (currentLineTokens.back().tokenType != T_IF)
+                    if (currentLineTokens.back() == Token(T_KWORD, "THEN")) break;
+                    if (currentLineTokens.back() != Token(T_KWORD, "IF"))
                     {
                         buffer.push_back(currentLineTokens.back());
                         currentLineTokens.pop_back();
@@ -131,7 +117,7 @@ Lexer::Lexer(string filePath)
                             currentLineTokens.push_back(buffer.back());
                             buffer.pop_back();
                         }
-                        currentLineTokens.push_back(Token(T_THEN));
+                        currentLineTokens.push_back(Token(T_KWORD, "THEN"));
                     }
                 else                // Throw exception on syntax error
                     throwException(Exception()); // TODO: Change exception type
@@ -139,17 +125,17 @@ Lexer::Lexer(string filePath)
             }
             else if (input == "else")
             {
-                currentLineTokens.push_back(Token(T_ELSE));
+                currentLineTokens.push_back(Token(T_KWORD, "ELSE"));
                 continue;
             }
             else if (input == "for")
             {
-                currentLineTokens.push_back(Token(T_FOR));
+                currentLineTokens.push_back(Token(T_KWORD, "FOR"));
                 continue;
             }
             else if (input == "while")
             {
-                currentLineTokens.push_back(Token(T_WHILE));
+                currentLineTokens.push_back(Token(T_KWORD, "WHILE"));
                 continue;
             }
 
@@ -206,30 +192,30 @@ Lexer::Lexer(string filePath)
                 switch(input[i])
                 {
                     case '(':
-                        currentLineTokens.push_back(Token(T_LPAREN));
+                        currentLineTokens.push_back(Token(T_SPR, "("));
                         break;
                     case ')':
-                        currentLineTokens.push_back(Token(T_RPAREN));
+                        currentLineTokens.push_back(Token(T_SPR, ")"));
                         break;
                     case '=':
                         if (input[i + 1] == '=')
                         {
-                            currentLineTokens.push_back(Token(T_EEQUALS));
+                            currentLineTokens.push_back(Token(T_BINOP, "=="));
                             i++;
                         }
-                        else currentLineTokens.push_back(Token(T_EQUALS));
+                        else currentLineTokens.push_back(Token(T_BINOP, "="));
                         break;
                     case '*':
-                        currentLineTokens.push_back(Token(T_MUL));
+                        currentLineTokens.push_back(Token(T_OPR, "*"));
                         break;
                     case '/':
-                        currentLineTokens.push_back(Token(T_DIV));
+                        currentLineTokens.push_back(Token(T_OPR, "/"));
                         break;
                     case '+':
-                        currentLineTokens.push_back(Token(T_ADD));
+                        currentLineTokens.push_back(Token(T_OPR, "+"));
                         break;
                     case '-':
-                        currentLineTokens.push_back(Token(T_SUB));
+                        currentLineTokens.push_back(Token(T_OPR, "-"));
                         break;
                 }
             }
@@ -242,7 +228,7 @@ Lexer::Lexer(string filePath)
             currentLineTokens.pop_front();
         }
 
-        tokens.push(Token(T_NEWLINE));  // Mark newline at the end of a line
+        tokens.push(Token(T_SPR, "\\n"));  // Mark newline at the end of a line
     }
 
     while (!tokens.empty())
