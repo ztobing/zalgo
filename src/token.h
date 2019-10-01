@@ -11,6 +11,8 @@ struct Token
     
     Token(string tokenType);
     Token(string tokenType, string value);
+    bool operator==(const Token &rhs) const;
+    bool operator!=(const Token &rhs) const;
 };
 
 Token::Token(string tokenType)
@@ -22,6 +24,16 @@ Token::Token(string tokenType)
 Token::Token(string tokenType, string value) : Token(tokenType)
 {
     this->value = value;
+}
+
+bool Token::operator==(const Token &rhs) const
+{
+    return (this->tokenType == rhs.tokenType) && (this->value == rhs.value);
+}
+
+bool Token::operator!=(const Token &rhs) const
+{
+    return (this->tokenType != rhs.tokenType) && (this->value != rhs.value);
 }
 
 #endif
