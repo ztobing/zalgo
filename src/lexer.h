@@ -201,7 +201,7 @@ Lexer::Lexer(string filePath)
                             currentLineTokens.push_back(Token(T_BINOP, "=="));
                             i++;
                         }
-                        else currentLineTokens.push_back(Token(T_BINOP, "="));
+                        else currentLineTokens.push_back(Token(T_OPR, "="));
                         break;
                     case '*':
                         currentLineTokens.push_back(Token(T_OPR, "*"));
