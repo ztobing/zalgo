@@ -13,8 +13,6 @@
 #define T_BINOP "BINOP"
 
 #define T_SPR "SPR"
-// #define T_LPAREN "LPAREN"
-// #define T_RPAREN "RPAREN"
 #define T_VAR "VAR"
 // #define T_FUNC "FUNC"
 // #define T_NEWLINE "NEWLINE"
