@@ -7,33 +7,15 @@ using namespace std;
 
 struct Token
 {
-    string tokenType, value;
-    
-    Token(string tokenType);
-    Token(string tokenType, string value);
-    bool operator==(const Token &rhs) const;
-    bool operator!=(const Token &rhs) const;
+    int type;
+    string value;
+    Token(int type, string value);
 };
 
-Token::Token(string tokenType)
+Token::Token(int type, string value)
 {
-    this->tokenType = tokenType;
-    this->value = "";
-}
-
-Token::Token(string tokenType, string value) : Token(tokenType)
-{
+    this->type = type;
     this->value = value;
-}
-
-bool Token::operator==(const Token &rhs) const
-{
-    return (this->tokenType == rhs.tokenType) && (this->value == rhs.value);
-}
-
-bool Token::operator!=(const Token &rhs) const
-{
-    return (this->tokenType != rhs.tokenType) && (this->value != rhs.value);
 }
 
 #endif
