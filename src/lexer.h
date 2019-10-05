@@ -217,6 +217,16 @@ void Lexer::add(char c)
                 tokens.push(Token(T_IF, ""));
                 resetCurrentToken();
             }
+            else if (currentTokenValue == "for")
+            {
+                tokens.push(Token(T_FOR, ""));
+                resetCurrentToken();                
+            }
+            else if (currentTokenValue == "while")
+            {
+                tokens.push(Token(T_WHILE, ""));
+                resetCurrentToken();               
+            }
         }
 
         if (currentTokenType != T_NONE)
