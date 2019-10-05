@@ -20,13 +20,20 @@
 #define T_OPR 20
 #define T_BINOP 21
 
+// Keywords
+#define T_IF 30
+#define T_FOR 31
+#define T_WHILE 32
+#define T_END 39
+
 // Separators
-#define T_LPAREN 30
-#define T_RPAREN 31
+#define T_LPAREN 40
+#define T_RPAREN 41
 
 #include <iostream>
 #include <queue>
 #include <stack>
+#include <algorithm>
 
 #include "token.h"
 
@@ -200,7 +207,23 @@ void Lexer::add(char c)
         return;
     }
 
-    // Handle keywords & code blocks
+    // Handle space and keywords
+    if (c == ' ')
+    {
+        if (currentTokenType == T_VAR)
+        {
+            if (currentTokenValue == "if")
+            {
+                tokens.push(Token(T_IF, ""));
+                resetCurrentToken();
+            }
+        }
+
+        if (currentTokenType != T_NONE)
+            pushCurrentToken();
+        resetCurrentToken();
+        return;
+    }
 
     // Handle identifiers
     if (currentTokenType == T_VAR)
@@ -224,14 +247,6 @@ void Lexer::add(char c)
         }
         
         return;
-    }
-
-    // Handle space
-    if (c == ' ')
-    {
-        if (currentTokenType != T_NONE)
-            pushCurrentToken();
-        resetCurrentToken();
     }
 
     // Handle EOF
