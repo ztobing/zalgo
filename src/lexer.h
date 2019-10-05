@@ -6,22 +6,23 @@
 #define T_NULL 1
 #define T_COMMANDNEND 2
 #define T_EOF 3
+#define T_COMMENT 4
 
 // Data types
-#define T_BOOL 4
-#define T_INT 5
-#define T_FLOAT 6
-#define T_STR 7
-#define T_VAR 8
-#define T_FUNC 9
+#define T_BOOL 10
+#define T_INT 11
+#define T_FLOAT 12
+#define T_STR 13
+#define T_VAR 14
+#define T_FUNC 15
 
 // Operators
-#define T_OPR 10
-#define T_BINOP 11
+#define T_OPR 20
+#define T_BINOP 21
 
 // Separators
-#define T_LPAREN 12
-#define T_RPAREN 13
+#define T_LPAREN 30
+#define T_RPAREN 31
 
 #include <iostream>
 #include <queue>
@@ -63,15 +64,18 @@ void Lexer::add(char c)
     cout << "CURRENT " << currentTokenType << endl;
     cout << "        " << currentTokenValue << endl;
 
-    // Handle Comment
-    // TODO: add comment parsing function
-
     // Handle String
     if (currentTokenType == T_STR && c != openedTags.top())
     {
         currentTokenValue += c;
         return;
     }
+
+    // Handle Comment
+    if (c == '#')
+        currentTokenType = T_COMMENT;
+    if (currentTokenType == T_COMMENT)
+        return;
 
     if (c == '"' || c == '\'')
     {
@@ -250,7 +254,7 @@ Token Lexer::next()
 
 void Lexer::pushEOL()
 {
-    if (currentTokenType != T_NONE)
+    if (currentTokenType != T_NONE && currentTokenType != T_COMMENT)
         pushCurrentToken();
     resetCurrentToken();
     tokens.push(Token(T_COMMANDNEND, ""));
