@@ -1,6 +1,6 @@
 #include <iostream>
-#include <string>
-#include "lexer.h"
+
+#include "zalgo.h"
 
 using namespace std;
 
@@ -8,16 +8,13 @@ int main(int argc, char* argv[])
 {
     if (argc == 1)
     {
-        // run in shell mode
+        cout << "Usage: zalgo [filename]" << endl;
+        exit(1);
     }
     else if (argc == 2)
     {
-        string x(argv[1]);
-        Lexer l(x);
+        Zalgo zalgo(argv[1]);
     }
-    else
-    {
-        cout << "Usage: zalgo [filename]" << endl;
-    }
-    
+
+    return 0;
 }
