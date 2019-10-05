@@ -1,32 +1,33 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-// Define tokens
-#define T_NULL "NULL"
+// Reserved
+#define T_NONE 0
+#define T_NULL 1
+#define T_COMMANDNEND 2
+#define T_EOF 3
 
-#define T_STR "STR"
-#define T_INT "INT"
-#define T_FLOAT "FLOAT"
+// Data types
+#define T_BOOL 4
+#define T_INT 5
+#define T_FLOAT 6
+#define T_STR 7
+#define T_VAR 8
+#define T_FUNC 9
 
-#define T_OPR "OPR"
-#define T_KWORD "KWORD"
-#define T_BINOP "BINOP"
+// Operators
+#define T_OPR 10
+#define T_BINOP 11
 
-#define T_SPR "SPR"
-#define T_VAR "VAR"
-// #define T_FUNC "FUNC"
-// #define T_NEWLINE "NEWLINE"
-// #define T_EOF "EOF"
+// Separators
+#define T_LPAREN 12
+#define T_RPAREN 13
 
 #include <iostream>
 #include <queue>
-#include <deque>
-#include <fstream>
-#include <sstream>
+#include <stack>
 
 #include "token.h"
-#include "exceptions/exception.h"
-#include "exceptions/syntaxErrorException.h"
 
 using namespace std;
 
@@ -34,214 +35,243 @@ class Lexer
 {
     private:
         queue<Token> tokens;
-        bool isAlpha(char c);
-        bool isNumber(char c);
-        void throwException(Exception e);
+        stack<char> openedTags;
+        int currentTokenType;
+        string currentTokenValue;
+        void resetCurrentToken();
+        void pushCurrentToken();
+        bool isAlpha(char);
+        bool isNumber(char);
     public:
         Lexer();
-        Lexer(string filePath);
+        void add(char);
         Token next();
+        void pushEOL();
+        bool eof();
 };
 
 Lexer::Lexer()
 {
-    // Add shell handling code
+    this->currentTokenType = 0;
+    this->currentTokenValue = "";
 }
 
-Lexer::Lexer(string filePath)
+void Lexer::add(char c)
 {
-    ifstream fStream(filePath);
+    // !! Temporary code !!
+    cout << "CHECK " << c << endl;
+    cout << "CURRENT " << currentTokenType << endl;
+    cout << "        " << currentTokenValue << endl;
 
-    // File validation
-    if (!fStream.good())
+    // Handle Comment
+    // TODO: add comment parsing function
+
+    // Handle String
+    if (currentTokenType == T_STR && c != openedTags.top())
     {
-        cout << "Can't read file: " << filePath << endl;
-        exit(1);
+        currentTokenValue += c;
+        return;
     }
 
-    // Tokenize input
-    string inputLine;
-    string token;
-    string expectedTokenType = T_NULL;
-
-    // String tokenizer variables
-    bool isTagOpened = false;
-
-    // Line and column number tracking
-    int currentLineNumber = 0;
-    int currentColNumber = 0;
-
-    while (getline(fStream, inputLine))
+    if (c == '"' || c == '\'')
     {
-        currentLineNumber++;
-        stringstream ss(inputLine);
-        string input;
-        deque<Token> currentLineTokens;
-
-        while (!ss.eof())
+        if (currentTokenType != T_STR)
         {
-            ss >> input;
-
-            if (input == "if")
+            if (currentTokenType != T_NONE)
             {
-                if (currentLineTokens.size() == 0) currentLineTokens.push_back(Token(T_KWORD, "IF"));
-                else throwException(SyntaxErrorException(currentLineNumber, 0)); // TODO: add line and col numbers
-                continue;
-            }
-            else if (input == "then")
-            {
-                deque<Token> buffer;
-                bool ifTokenFound = false;
-                // Pop current line tokens until if token is found
-                while (!currentLineTokens.empty())
-                {
-                    if (currentLineTokens.back() == Token(T_KWORD, "THEN")) break;
-                    if (currentLineTokens.back() != Token(T_KWORD, "IF"))
-                    {
-                        buffer.push_back(currentLineTokens.back());
-                        currentLineTokens.pop_back();
-                    }
-                    else
-                    {
-                        ifTokenFound = true;
-                        break;
-                    }
-                }
-
-                if (ifTokenFound)   // Put tokens back to its original place when syntax is validated
-                    {
-                        while (!buffer.empty())
-                        {
-                            currentLineTokens.push_back(buffer.back());
-                            buffer.pop_back();
-                        }
-                        currentLineTokens.push_back(Token(T_KWORD, "THEN"));
-                    }
-                else                // Throw exception on syntax error
-                    throwException(Exception()); // TODO: Change exception type
-                continue;
-            }
-            else if (input == "else")
-            {
-                currentLineTokens.push_back(Token(T_KWORD, "ELSE"));
-                continue;
-            }
-            else if (input == "for")
-            {
-                currentLineTokens.push_back(Token(T_KWORD, "FOR"));
-                continue;
-            }
-            else if (input == "while")
-            {
-                currentLineTokens.push_back(Token(T_KWORD, "WHILE"));
-                continue;
+                pushCurrentToken();
+                resetCurrentToken();
             }
 
-            if (isAlpha(input[0]))  // If it detect alphabet first in line
-            {
-                if (((currentLineTokens.size() != 0) ? currentLineTokens.back().tokenType : T_NULL) != T_VAR)
-                    currentLineTokens.push_back(Token(T_VAR, input));   // Parse as variable
-                else throwException(SyntaxErrorException(currentLineNumber, 0)); // TODO: add line and col numbers
-                continue;
-            }
-            else if (isNumber(input[0]))    // If it detect integer first in line
-            {
-                if (input[1] == '.')    // Check if its a float by checking if the char after the first is .
-                {
-                    if (count(begin(input), end(input), '.') == 1)
-                    {
-                        currentLineTokens.push_back(Token(T_FLOAT, input));     // Parse as float
-                        continue;
-                    }
-                    throwException(Exception()); // TODO: add exception type
-                }
-                else
-                {
-                    bool ST00PID = false;
-                    for (int i = 0; i < input.size(); i++)
-                    {
-                        if (isAlpha(input[i]))  // if it found alphabet after integer that mean UR ST00PID 
-                        {
-                            ST00PID = true;
-                            throwException(Exception()); // TODO: Change exception type
-                        }
-                    }
-                    if (!ST00PID)   // If smart boi
-                    {
-                        currentLineTokens.push_back(Token(T_INT, input));   // Parse as int
-                        continue;
-                    }
-                }
-            }
-
-            else if (input[0] == '.')   // If detect '.'
-            {
-                if (count(begin(input), end(input), '.') == 1)
-                    {
-                        currentLineTokens.push_back(Token(T_FLOAT, input));     // Parse as float
-                        continue;
-                    }
-                    throwException(Exception()); // TODO: add exception type
-            }
-
-            // Symbols parsing
-            for (int i = 0; i < input.length(); i++)
-            {
-                switch(input[i])
-                {
-                    case '(':
-                        currentLineTokens.push_back(Token(T_SPR, "("));
-                        break;
-                    case ')':
-                        currentLineTokens.push_back(Token(T_SPR, ")"));
-                        break;
-                    case '=':
-                        if (input[i + 1] == '=')
-                        {
-                            currentLineTokens.push_back(Token(T_BINOP, "=="));
-                            i++;
-                        }
-                        else currentLineTokens.push_back(Token(T_OPR, "="));
-                        break;
-                    case '*':
-                        currentLineTokens.push_back(Token(T_OPR, "*"));
-                        break;
-                    case '/':
-                        currentLineTokens.push_back(Token(T_OPR, "/"));
-                        break;
-                    case '+':
-                        currentLineTokens.push_back(Token(T_OPR, "+"));
-                        break;
-                    case '-':
-                        currentLineTokens.push_back(Token(T_OPR, "-"));
-                        break;
-                }
-            }
+            currentTokenType = T_STR;
+            openedTags.push(c);
+            return;
         }
-
-        // Empty validated tokens
-        while (!currentLineTokens.empty())
+        else
         {
-            tokens.push(currentLineTokens.front());
-            currentLineTokens.pop_front();
+            tokens.push(Token(currentTokenType, currentTokenValue));
+            openedTags.pop();
+            resetCurrentToken();
+            return;
         }
-
-        tokens.push(Token(T_SPR, "\\n"));  // Mark newline at the end of a line
     }
 
-    while (!tokens.empty())
+    // Handle symbols
+    switch (c)
     {
-        Token token = tokens.front();
-        cout << "Token(TYPE=" + token.tokenType + ", VALUE=" + token.value + ")" << endl;
-        tokens.pop();
+        case '(':
+        {
+            if (currentTokenType != T_NONE)
+            {
+                pushCurrentToken();
+                resetCurrentToken();
+            }
+            tokens.push(Token(T_LPAREN, ""));
+            return;
+        }
+        case ')':
+        {
+            if (currentTokenType != T_NONE)
+            {
+                pushCurrentToken();
+                resetCurrentToken();
+            }
+            tokens.push(Token(T_RPAREN, ""));
+            return;
+        }
+        case '=':
+        {
+            // TODO: Add binary operation handling
+            if (currentTokenType == T_OPR && currentTokenValue == "=")
+            {
+                currentTokenType = T_BINOP;
+                currentTokenValue += "=";
+                pushCurrentToken();
+                resetCurrentToken();
+            }
+            else if (currentTokenType != T_NONE)
+            {
+                pushCurrentToken();
+                resetCurrentToken();
+                currentTokenType = T_OPR;
+                currentTokenValue = "=";
+            }
+            else if (currentTokenType == T_NONE)
+            {
+                currentTokenType = T_OPR;
+                currentTokenValue = "=";
+            }
+            return;
+        }
+        case '*':
+        case '/':
+        case '+':
+        case '-':
+        {
+            if (currentTokenType != T_NONE)
+            {
+                pushCurrentToken();
+                resetCurrentToken();
+            }
+            string temp = "";
+            temp += c;
+            tokens.push(Token(T_OPR, temp));
+        }
+    }
+
+    // Handle integers
+    if (isNumber(c))
+    {
+        if (currentTokenType == T_INT || currentTokenType == T_FLOAT)
+        {
+            currentTokenValue += c;
+            return;
+        }
+        if (currentTokenType == T_VAR)
+        {
+            currentTokenValue += c;
+            return;
+        }
+        if (currentTokenType != T_NONE)
+        {
+            pushCurrentToken();
+            resetCurrentToken();
+        }
+        currentTokenType = T_INT;
+        currentTokenValue += c;
+        return;
+    }
+
+    // Handle float
+    if (currentTokenType == T_FLOAT && c == '.')
+    {
+        // TODO: add exception
+        return;
+    }
+    
+    if (currentTokenType == T_INT)
+    {
+        currentTokenType = T_FLOAT;
+        currentTokenValue += c;
+        return;
+    }
+
+    // Handle keywords & code blocks
+
+    // Handle identifiers
+    if (currentTokenType == T_VAR)
+    {
+        currentTokenValue += c;
+        return;
+    }
+
+    if (currentTokenType != T_VAR)
+    {
+        if (currentTokenType != T_NONE) pushCurrentToken();
+        resetCurrentToken();
+        if (isAlpha(c) || c == '_')
+        {
+            currentTokenType = T_VAR;
+            currentTokenValue = c;
+        }
+        else
+        {
+            // TODO: Add parse error exception
+        }
+        
+        return;
+    }
+
+    // Handle space
+    if (c == ' ')
+    {
+        if (currentTokenType != T_NONE)
+            pushCurrentToken();
+        resetCurrentToken();
+    }
+
+    // Handle EOF
+    if (c == -1)
+    {
+        if (currentTokenType != T_NONE)
+            pushCurrentToken();
+        tokens.push(Token(T_EOF, ""));
     }
 }
 
 Token Lexer::next()
 {
+    if (tokens.empty()) return Token(T_EOF, "");
+    
     Token token = tokens.front();
     tokens.pop();
     return token;
+}
+
+void Lexer::pushEOL()
+{
+    if (currentTokenType != T_NONE)
+        pushCurrentToken();
+    resetCurrentToken();
+    tokens.push(Token(T_COMMANDNEND, ""));
+}
+
+bool Lexer::eof()
+{
+    return tokens.empty();
+}
+
+void Lexer::resetCurrentToken()
+{
+    currentTokenType = T_NONE;
+    currentTokenValue = "";
+    return;
+}
+
+void Lexer::pushCurrentToken()
+{
+    tokens.push(Token(currentTokenType, currentTokenValue));
+    return;
 }
 
 bool Lexer::isAlpha(char c)
@@ -252,12 +282,6 @@ bool Lexer::isAlpha(char c)
 bool Lexer::isNumber(char c)
 {
     return c >= 48 && c <= 57;
-}
-
-void Lexer::throwException(Exception e)
-{
-    cout << "Exception happened on runtime: " << e.exception << endl << e.description << endl;
-    exit(1);
 }
 
 #endif
