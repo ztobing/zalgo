@@ -34,6 +34,7 @@ Zalgo::Zalgo(string filePath)
 
     // Split strings into chars and pass it to lexer
     // TODO: add line and col number tracker for error handling purposes
+    int lineNumber = 1, colNumber = 1;
     while (!ifs.eof())
     {
         string currentLine;
@@ -41,15 +42,18 @@ Zalgo::Zalgo(string filePath)
 
         for (string::iterator itr = currentLine.begin(); itr != currentLine.end(); itr++)
         {
-            lexer.add(*itr);
+            lexer.add(*itr, lineNumber, colNumber);
+            colNumber++;
         }
 
         // Push end of instruction token
         lexer.pushEOL();
+        lineNumber++;
+        colNumber = 1;
     }
 
     // Push EOF
-    lexer.add(-1);
+    lexer.add(-1, -1, -1);
 
     // !! Temporary code !!
     // Prints all tokenized code after parsing
