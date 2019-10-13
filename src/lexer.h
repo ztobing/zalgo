@@ -36,6 +36,8 @@
 #include <algorithm>
 
 #include "token.h"
+#include "exceptions/exception.h"
+#include "exceptions/syntaxError.h"
 
 using namespace std;
 
@@ -48,11 +50,13 @@ class Lexer
         string currentTokenValue;
         void resetCurrentToken();
         void pushCurrentToken();
+        void popSeparator(char);
+        void printException(Exception);
         bool isAlpha(char);
         bool isNumber(char);
     public:
         Lexer();
-        void add(char);
+        void add(char c);
         Token next();
         void pushEOL();
         bool eof();
@@ -132,26 +136,76 @@ void Lexer::add(char c)
         }
         case '=':
         {
-            // TODO: Add binary operation handling
-            if (currentTokenType == T_OPR && currentTokenValue == "=")
+            if (currentTokenType == T_OPR)
             {
-                currentTokenType = T_BINOP;
-                currentTokenValue += "=";
-                pushCurrentToken();
-                resetCurrentToken();
+                if (currentTokenValue == "=")
+                {
+                    currentTokenType = T_BINOP;
+                    currentTokenValue += "=";
+                }
+                else
+                {
+                    // TODO: throw error
+                }
+                
+            }
+            else if (currentTokenType == T_BINOP)
+            {
+                if (currentTokenValue.length() >= 2)
+                {
+                    printException(SyntaxError(0, 0, "Invalid operator: " + currentTokenValue + c));
+                    return;
+                }
+                switch (currentTokenValue[0])
+                {
+                    case '<':
+                    case '>':
+                    case '!':
+                    {
+                        currentTokenValue += c;
+                        return;
+                    }
+                    default:
+                    {
+                        // TODO: throw error
+                    }
+                    return;
+                }
             }
             else if (currentTokenType != T_NONE)
             {
                 pushCurrentToken();
                 resetCurrentToken();
-                currentTokenType = T_OPR;
-                currentTokenValue = "=";
             }
-            else if (currentTokenType == T_NONE)
+            currentTokenType = T_OPR;
+            currentTokenValue = "=";
+            return;
+        }
+        case '>':
+        case '<':
+        {
+            if (currentTokenType != T_NONE)
             {
-                currentTokenType = T_OPR;
-                currentTokenValue = "=";
+                pushCurrentToken();
+                resetCurrentToken();
             }
+            currentTokenType = T_BINOP;
+            currentTokenValue = c;
+            return;
+        }
+        case '!':
+        {
+            if (currentTokenType == T_BINOP)
+            {
+                // return error 
+            }
+            else if (currentTokenType != T_NONE)
+            {
+                pushCurrentToken();
+                resetCurrentToken();
+            }
+            currentTokenType = T_BINOP;
+            currentTokenValue = "!";
             return;
         }
         case '*':
@@ -164,9 +218,11 @@ void Lexer::add(char c)
                 pushCurrentToken();
                 resetCurrentToken();
             }
-            string temp = "";
-            temp += c;
-            tokens.push(Token(T_OPR, temp));
+            currentTokenValue = c;
+            currentTokenType = T_OPR;
+            // string temp = "";
+            // temp += c;
+            // tokens.push(Token(T_OPR, temp));
         }
     }
 
@@ -238,6 +294,7 @@ void Lexer::add(char c)
     // Handle identifiers
     if (currentTokenType == T_VAR)
     {
+        // todo: add identifier validation
         currentTokenValue += c;
         return;
     }
@@ -301,6 +358,26 @@ void Lexer::pushCurrentToken()
 {
     tokens.push(Token(currentTokenType, currentTokenValue));
     return;
+}
+
+void Lexer::popSeparator(char c)
+{
+    if (openedTags.top() == c)
+    {
+        openedTags.pop();
+    }
+    else
+    {
+        // TODO: throw error
+    }
+    return;
+}
+
+void Lexer::printException(Exception e)
+{
+    cout << e.type << " at line " << e.line << ", col " << e.col << endl
+         << e.message << endl;
+    exit(1);
 }
 
 bool Lexer::isAlpha(char c)
