@@ -48,7 +48,6 @@ class Lexer
         stack<char> openedTags;
         int currentTokenType;
         string currentTokenValue;
-        // void resetCurrentToken();
         void pushCurrentToken();
         void popSeparator(char);
         void printException(Exception);
@@ -92,9 +91,7 @@ void Lexer::add(char c)
     {
         if (currentTokenType != T_STR)
         {
-            // if (currentTokenType != T_NONE)
-                pushCurrentToken();
-
+            pushCurrentToken();
             currentTokenType = T_STR;
             openedTags.push(c);
             return;
@@ -103,8 +100,6 @@ void Lexer::add(char c)
         {
             pushCurrentToken();
             openedTags.pop();
-            // tokens.push(Token(currentTokenType, currentTokenValue));
-            // resetCurrentToken();
             return;
         }
     }
@@ -173,7 +168,6 @@ void Lexer::add(char c)
         case '<':
         {
             pushCurrentToken();
-                // resetCurrentToken();
             currentTokenType = T_BINOP;
             currentTokenValue = c;
             return;
@@ -197,9 +191,6 @@ void Lexer::add(char c)
             pushCurrentToken();
             currentTokenValue = c;
             currentTokenType = T_OPR;
-            // string temp = "";
-            // temp += c;
-            // tokens.push(Token(T_OPR, temp));
         }
     }
 
