@@ -48,7 +48,7 @@ class Lexer
         stack<char> openedTags;
         int currentTokenType;
         string currentTokenValue;
-        void resetCurrentToken();
+        // void resetCurrentToken();
         void pushCurrentToken();
         void popSeparator(char);
         void printException(Exception);
@@ -92,11 +92,8 @@ void Lexer::add(char c)
     {
         if (currentTokenType != T_STR)
         {
-            if (currentTokenType != T_NONE)
-            {
+            // if (currentTokenType != T_NONE)
                 pushCurrentToken();
-                resetCurrentToken();
-            }
 
             currentTokenType = T_STR;
             openedTags.push(c);
@@ -104,9 +101,10 @@ void Lexer::add(char c)
         }
         else
         {
-            tokens.push(Token(currentTokenType, currentTokenValue));
+            pushCurrentToken();
             openedTags.pop();
-            resetCurrentToken();
+            // tokens.push(Token(currentTokenType, currentTokenValue));
+            // resetCurrentToken();
             return;
         }
     }
@@ -116,22 +114,16 @@ void Lexer::add(char c)
     {
         case '(':
         {
-            if (currentTokenType != T_NONE)
-            {
-                pushCurrentToken();
-                resetCurrentToken();
-            }
-            tokens.push(Token(T_LPAREN, ""));
+            pushCurrentToken();
+            currentTokenType = T_LPAREN;
+            currentTokenValue = "";
             return;
         }
         case ')':
         {
-            if (currentTokenType != T_NONE)
-            {
-                pushCurrentToken();
-                resetCurrentToken();
-            }
-            tokens.push(Token(T_RPAREN, ""));
+            pushCurrentToken();
+            currentTokenType = T_RPAREN;
+            currentTokenValue = "";
             return;
         }
         case '=':
@@ -172,11 +164,7 @@ void Lexer::add(char c)
                     return;
                 }
             }
-            else if (currentTokenType != T_NONE)
-            {
-                pushCurrentToken();
-                resetCurrentToken();
-            }
+            pushCurrentToken();
             currentTokenType = T_OPR;
             currentTokenValue = "=";
             return;
@@ -184,11 +172,8 @@ void Lexer::add(char c)
         case '>':
         case '<':
         {
-            if (currentTokenType != T_NONE)
-            {
-                pushCurrentToken();
-                resetCurrentToken();
-            }
+            pushCurrentToken();
+                // resetCurrentToken();
             currentTokenType = T_BINOP;
             currentTokenValue = c;
             return;
@@ -199,11 +184,7 @@ void Lexer::add(char c)
             {
                 // return error 
             }
-            else if (currentTokenType != T_NONE)
-            {
-                pushCurrentToken();
-                resetCurrentToken();
-            }
+            pushCurrentToken();
             currentTokenType = T_BINOP;
             currentTokenValue = "!";
             return;
@@ -213,11 +194,7 @@ void Lexer::add(char c)
         case '+':
         case '-':
         {
-            if (currentTokenType != T_NONE)
-            {
-                pushCurrentToken();
-                resetCurrentToken();
-            }
+            pushCurrentToken();
             currentTokenValue = c;
             currentTokenType = T_OPR;
             // string temp = "";
@@ -239,11 +216,7 @@ void Lexer::add(char c)
             currentTokenValue += c;
             return;
         }
-        if (currentTokenType != T_NONE)
-        {
-            pushCurrentToken();
-            resetCurrentToken();
-        }
+        pushCurrentToken();
         currentTokenType = T_INT;
         currentTokenValue += c;
         return;
@@ -270,24 +243,21 @@ void Lexer::add(char c)
         {
             if (currentTokenValue == "if")
             {
-                tokens.push(Token(T_IF, ""));
-                resetCurrentToken();
+                currentTokenType = T_IF;
+                currentTokenValue = "";
             }
             else if (currentTokenValue == "for")
             {
-                tokens.push(Token(T_FOR, ""));
-                resetCurrentToken();                
+                currentTokenType = T_FOR;
+                currentTokenValue = "";            
             }
             else if (currentTokenValue == "while")
             {
-                tokens.push(Token(T_WHILE, ""));
-                resetCurrentToken();               
+                currentTokenType = T_WHILE;
+                currentTokenValue = "";           
             }
         }
-
-        if (currentTokenType != T_NONE)
-            pushCurrentToken();
-        resetCurrentToken();
+        pushCurrentToken();
         return;
     }
 
@@ -301,8 +271,7 @@ void Lexer::add(char c)
 
     if (currentTokenType != T_VAR)
     {
-        if (currentTokenType != T_NONE) pushCurrentToken();
-        resetCurrentToken();
+        pushCurrentToken();
         if (isAlpha(c) || c == '_')
         {
             currentTokenType = T_VAR;
@@ -319,8 +288,7 @@ void Lexer::add(char c)
     // Handle EOF
     if (c == -1)
     {
-        if (currentTokenType != T_NONE)
-            pushCurrentToken();
+        pushCurrentToken();
         tokens.push(Token(T_EOF, ""));
     }
 }
@@ -338,7 +306,6 @@ void Lexer::pushEOL()
 {
     if (currentTokenType != T_NONE && currentTokenType != T_COMMENT)
         pushCurrentToken();
-    resetCurrentToken();
     tokens.push(Token(T_COMMANDNEND, ""));
 }
 
@@ -347,16 +314,19 @@ bool Lexer::eof()
     return tokens.empty();
 }
 
-void Lexer::resetCurrentToken()
-{
-    currentTokenType = T_NONE;
-    currentTokenValue = "";
-    return;
-}
+// void Lexer::resetCurrentToken()
+// {
+//     currentTokenType = T_NONE;
+//     currentTokenValue = "";
+//     return;
+// }
 
 void Lexer::pushCurrentToken()
 {
-    tokens.push(Token(currentTokenType, currentTokenValue));
+    if (currentTokenType != T_NONE)
+        tokens.push(Token(currentTokenType, currentTokenValue));
+    currentTokenType = T_NONE;
+    currentTokenValue = "";
     return;
 }
 
