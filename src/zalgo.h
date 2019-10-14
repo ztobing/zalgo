@@ -57,11 +57,11 @@ Zalgo::Zalgo(string filePath)
 
     // !! Temporary code !!
     // Prints all tokenized code after parsing
-    cout << "Token\tValue" << endl;
+    cout << "Token\tLine,col\tValue" << endl;
     while (!lexer.eof())
     {
         Token t = lexer.next();
-        cout << t.type << "\t" << t.value << endl;
+        cout << t.type << "\t" << t.line << "," << t.col << "\t\t" << t.value << endl;
     }
 }
 
