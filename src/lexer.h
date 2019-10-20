@@ -48,14 +48,16 @@ class Lexer
         stack<char> openedTags;
         int currentTokenType;
         string currentTokenValue;
+        int currentLine, currentCol, currentTokenLine, currentTokenCol;
         void pushCurrentToken();
         void popSeparator(char);
+        void setTokenPosition();
         void printException(Exception);
         bool isAlpha(char);
         bool isNumber(char);
     public:
         Lexer();
-        void add(char c);
+        void add(char c, string currentLineContent, int line, int col);
         Token next();
         void pushEOL();
         bool eof();
@@ -65,10 +67,14 @@ Lexer::Lexer()
 {
     this->currentTokenType = 0;
     this->currentTokenValue = "";
+    this->currentLine = this->currentCol = this->currentTokenLine = this->currentTokenCol = 1;
 }
 
-void Lexer::add(char c)
+void Lexer::add(char c, string currentLineContent, int line, int col)
 {
+    currentLine = line;
+    currentCol = col;
+
     // !! Temporary code !!
     cout << "CHECK " << c << endl;
     cout << "CURRENT " << currentTokenType << endl;
@@ -80,13 +86,6 @@ void Lexer::add(char c)
         currentTokenValue += c;
         return;
     }
-
-    // Handle Comment
-    if (c == '#')
-        currentTokenType = T_COMMENT;
-    if (currentTokenType == T_COMMENT)
-        return;
-
     if (c == '"' || c == '\'')
     {
         if (currentTokenType != T_STR)
@@ -103,6 +102,12 @@ void Lexer::add(char c)
             return;
         }
     }
+
+    // Handle Comment
+    if (c == '#')
+        currentTokenType = T_COMMENT;
+    if (currentTokenType == T_COMMENT)
+        return;
 
     // Handle symbols
     switch (c)
@@ -140,7 +145,7 @@ void Lexer::add(char c)
             {
                 if (currentTokenValue.length() >= 2)
                 {
-                    printException(SyntaxError(0, 0, "Invalid operator: " + currentTokenValue + c));
+                    printException(SyntaxError(currentTokenLine, currentTokenCol, currentLineContent, "Invalid operator: " + currentTokenValue + c));
                     return;
                 }
                 switch (currentTokenValue[0])
@@ -217,10 +222,11 @@ void Lexer::add(char c)
     if (currentTokenType == T_FLOAT && c == '.')
     {
         // TODO: add exception
+        printException(Exception(line, col, currentLineContent, "asd", "asd test"));
         return;
     }
     
-    if (currentTokenType == T_INT)
+    if (c == '.' && currentTokenType == T_INT)
     {
         currentTokenType = T_FLOAT;
         currentTokenValue += c;
@@ -280,13 +286,13 @@ void Lexer::add(char c)
     if (c == -1)
     {
         pushCurrentToken();
-        tokens.push(Token(T_EOF, ""));
+        tokens.push(Token(currentTokenLine, currentTokenCol, T_EOF, ""));
     }
 }
 
 Token Lexer::next()
 {
-    if (tokens.empty()) return Token(T_EOF, "");
+    if (tokens.empty()) return Token(currentTokenLine, currentTokenCol, T_EOF, "");
     
     Token token = tokens.front();
     tokens.pop();
@@ -297,7 +303,7 @@ void Lexer::pushEOL()
 {
     if (currentTokenType != T_NONE && currentTokenType != T_COMMENT)
         pushCurrentToken();
-    tokens.push(Token(T_COMMANDNEND, ""));
+    tokens.push(Token(currentTokenLine, currentTokenCol, T_COMMANDNEND, ""));
 }
 
 bool Lexer::eof()
@@ -315,9 +321,10 @@ bool Lexer::eof()
 void Lexer::pushCurrentToken()
 {
     if (currentTokenType != T_NONE)
-        tokens.push(Token(currentTokenType, currentTokenValue));
+        tokens.push(Token(currentTokenLine, currentTokenCol, currentTokenType, currentTokenValue));
     currentTokenType = T_NONE;
     currentTokenValue = "";
+    setTokenPosition();
     return;
 }
 
@@ -334,9 +341,16 @@ void Lexer::popSeparator(char c)
     return;
 }
 
+void Lexer::setTokenPosition()
+{
+    currentTokenLine = currentLine;
+    currentTokenCol = currentCol;
+}
+
 void Lexer::printException(Exception e)
 {
     cout << e.type << " at line " << e.line << ", col " << e.col << endl
+         << e.currentLine << endl
          << e.message << endl;
     exit(1);
 }

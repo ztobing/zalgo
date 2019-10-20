@@ -42,7 +42,7 @@ Zalgo::Zalgo(string filePath)
 
         for (string::iterator itr = currentLine.begin(); itr != currentLine.end(); itr++)
         {
-            lexer.add(*itr, lineNumber, colNumber);
+            lexer.add(*itr, currentLine, lineNumber, colNumber);
             colNumber++;
         }
 
@@ -53,7 +53,7 @@ Zalgo::Zalgo(string filePath)
     }
 
     // Push EOF
-    lexer.add(-1, -1, -1);
+    lexer.add(-1, " ", -1, -1);
 
     // !! Temporary code !!
     // Prints all tokenized code after parsing
