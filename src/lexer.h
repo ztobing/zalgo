@@ -55,6 +55,14 @@ class Lexer
         void printException(Exception);
         bool isAlpha(char);
         bool isNumber(char);
+
+        bool parseString(char c, string currentLineContent, int line, int col);
+        bool parseComment(char c, string currentLineContent, int line, int col);
+        bool parseSymbol(char c, string currentLineContent, int line, int col);
+        bool parseNumber(char c, string currentLineContent, int line, int col);
+        bool parseSpace(char c, string currentLineContent, int line, int col);
+        bool parseIdentifier(char c, string currentLineContent, int line, int col);
+        bool parseEOF(char c, string currentLineContent, int line, int col);
     public:
         Lexer();
         void add(char c, string currentLineContent, int line, int col);
@@ -80,11 +88,22 @@ void Lexer::add(char c, string currentLineContent, int line, int col)
     cout << "CURRENT " << currentTokenType << endl;
     cout << "        " << currentTokenValue << endl;
 
-    // Handle String
+    // Process input according to the lexer order of precedence
+    if (parseString(c, currentLineContent, line, col)) return;
+    if (parseComment(c, currentLineContent, line, col)) return;
+    if (parseSymbol(c, currentLineContent, line, col)) return;
+    if (parseNumber(c, currentLineContent, line, col)) return;
+    if (parseSpace(c, currentLineContent, line, col)) return;
+    if (parseIdentifier(c, currentLineContent, line, col)) return;
+    if (parseEOF(c, currentLineContent, line, col)) return;
+}
+
+bool Lexer::parseString(char c, string currentLineContent, int line, int col)
+{
     if (currentTokenType == T_STR && c != openedTags.top())
     {
         currentTokenValue += c;
-        return;
+        return true;
     }
     if (c == '"' || c == '\'')
     {
@@ -93,23 +112,29 @@ void Lexer::add(char c, string currentLineContent, int line, int col)
             pushCurrentToken();
             currentTokenType = T_STR;
             openedTags.push(c);
-            return;
+            return true;
         }
         else
         {
             pushCurrentToken();
             openedTags.pop();
-            return;
+            return true;
         }
     }
+    return false;
+}
 
-    // Handle Comment
+bool Lexer::parseComment(char c, string currentLineContent, int line, int col)
+{
     if (c == '#')
         currentTokenType = T_COMMENT;
     if (currentTokenType == T_COMMENT)
-        return;
+        return true;
+    return false;
+}
 
-    // Handle symbols
+bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
+{
     switch (c)
     {
         case '(':
@@ -117,14 +142,14 @@ void Lexer::add(char c, string currentLineContent, int line, int col)
             pushCurrentToken();
             currentTokenType = T_LPAREN;
             currentTokenValue = "";
-            return;
+            return true;
         }
         case ')':
         {
             pushCurrentToken();
             currentTokenType = T_RPAREN;
             currentTokenValue = "";
-            return;
+            return true;
         }
         case '=':
         {
@@ -146,7 +171,7 @@ void Lexer::add(char c, string currentLineContent, int line, int col)
                 if (currentTokenValue.length() >= 2)
                 {
                     printException(SyntaxError(currentTokenLine, currentTokenCol, currentLineContent, "Invalid operator: " + currentTokenValue + c));
-                    return;
+                    return true;
                 }
                 switch (currentTokenValue[0])
                 {
@@ -155,19 +180,19 @@ void Lexer::add(char c, string currentLineContent, int line, int col)
                     case '!':
                     {
                         currentTokenValue += c;
-                        return;
+                        return true;
                     }
                     default:
                     {
                         // TODO: throw error
                     }
-                    return;
+                    return true;
                 }
             }
             pushCurrentToken();
             currentTokenType = T_OPR;
             currentTokenValue = "=";
-            return;
+            return true;
         }
         case '>':
         case '<':
@@ -175,7 +200,7 @@ void Lexer::add(char c, string currentLineContent, int line, int col)
             pushCurrentToken();
             currentTokenType = T_BINOP;
             currentTokenValue = c;
-            return;
+            return true;
         }
         case '!':
         {
@@ -186,7 +211,7 @@ void Lexer::add(char c, string currentLineContent, int line, int col)
             pushCurrentToken();
             currentTokenType = T_BINOP;
             currentTokenValue = "!";
-            return;
+            return true;
         }
         case '*':
         case '/':
@@ -198,24 +223,28 @@ void Lexer::add(char c, string currentLineContent, int line, int col)
             currentTokenType = T_OPR;
         }
     }
+    return false;
+}
 
+bool Lexer::parseNumber(char c, string currentLineContent, int line, int col)
+{
     // Handle integers
     if (isNumber(c))
     {
         if (currentTokenType == T_INT || currentTokenType == T_FLOAT)
         {
             currentTokenValue += c;
-            return;
+            return true;
         }
         if (currentTokenType == T_VAR)
         {
             currentTokenValue += c;
-            return;
+            return true;
         }
         pushCurrentToken();
         currentTokenType = T_INT;
         currentTokenValue += c;
-        return;
+        return true;
     }
 
     // Handle float
@@ -223,16 +252,20 @@ void Lexer::add(char c, string currentLineContent, int line, int col)
     {
         // TODO: add exception
         printException(Exception(line, col, currentLineContent, "asd", "asd test"));
-        return;
+        return true;
     }
     
     if (c == '.' && currentTokenType == T_INT)
     {
         currentTokenType = T_FLOAT;
         currentTokenValue += c;
-        return;
+        return true;
     }
+    return false;
+}
 
+bool Lexer::parseSpace (char c, string currentLineValue, int line, int col)
+{
     // Handle space and keywords
     if (c == ' ')
     {
@@ -255,17 +288,20 @@ void Lexer::add(char c, string currentLineContent, int line, int col)
             }
         }
         pushCurrentToken();
-        return;
+        return true;
     }
+    return false;
+}
 
+bool Lexer::parseIdentifier(char c, string currentLineContent, int line, int col)
+{
     // Handle identifiers
     if (currentTokenType == T_VAR)
     {
         // todo: add identifier validation
         currentTokenValue += c;
-        return;
+        return true;
     }
-
     if (currentTokenType != T_VAR)
     {
         pushCurrentToken();
@@ -279,15 +315,21 @@ void Lexer::add(char c, string currentLineContent, int line, int col)
             // TODO: Add parse error exception
         }
         
-        return;
+        return true;
     }
+    return false;
+}
 
+bool Lexer::parseEOF(char c, string currentLineContent, int line, int col)
+{
     // Handle EOF
     if (c == -1)
     {
         pushCurrentToken();
         tokens.push(Token(currentTokenLine, currentTokenCol, T_EOF, ""));
+        return true;
     }
+    return false;
 }
 
 Token Lexer::next()
