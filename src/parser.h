@@ -44,17 +44,12 @@ void Parser::genAST()
 
 void Parser::eat(int tokenType)
 {
-    cout << "Eating " << currentToken.type << " cmp " << tokenType << endl;
-    if (tokenType == currentToken.type)
-    {
-        this->currentToken = this->lexer.next();
-    }
+    if (tokenType == currentToken.type) this->currentToken = this->lexer.next();
     else {cout << "error gobs" << endl; exit(1);}
 }
 
 AST Parser::factor()
 {
-    cout << "Fact " << currentToken.value << endl;
     Token token = currentToken;
 
     if (token.type == T_OPR && token.value == "+")
@@ -74,7 +69,6 @@ AST Parser::factor()
     if (token.type == T_INT)
     {
         eat(T_INT);
-        cout << "factor ate some int shit" << endl;
         return AST(token);
     }
     if (token.type == T_FLOAT)
@@ -89,25 +83,21 @@ AST Parser::factor()
         eat(T_RPAREN);
         return ast;
     }
-    return AST(Token(T_NONE, -1, -1, "fucked " + currentToken.value + to_string(currentToken.type)));
 }
 
 AST Parser::term()
 {
-    cout << "Term " << currentToken.value << endl;
     AST node = factor();
 
     while (currentToken.type == T_OPR && (currentToken.value == "*" || currentToken.value == "/"))
     {
         Token token = currentToken;
         eat(T_OPR);
-        cout << "term ate some shit" << endl;
         AST newNode(token);
         newNode.setLeft(node);
         newNode.setRight(factor());
         node = newNode;
     }
-    cout << "term done" << endl;
     return node;
 }
 
@@ -120,13 +110,11 @@ AST Parser::expr()
     {
         Token token = currentToken;
         eat(T_OPR);
-        cout << "expr ate some shit" << endl;
         AST newNode(token);
         newNode.setLeft(node);
         newNode.setRight(term());
         node = newNode;
     }
-    cout << "expr done" << endl;
     return node;
 }
 
