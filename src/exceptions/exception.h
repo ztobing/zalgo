@@ -7,18 +7,21 @@ using namespace std;
 
 struct Exception
 {
-    int line, col;
-    string currentLine, type, message;
     Exception(int, int, string, string, string);
 };
 
 Exception::Exception(int line, int col, string currentLine, string type, string message)
 {
-    this->line = line;
-    this->col = col;
-    this->type = type;
-    this->currentLine = currentLine;
-    this->message = message;
+    cout << type << " at line " << line << ", col " << col << endl
+         << currentLine << endl;
+
+    for (int i = 0; i < col - 1; i++)
+    {
+        cout << " ";
+    }
+    cout << "^" << endl;
+    cout << message << endl;
+    exit(1);
 }
 
 #endif
