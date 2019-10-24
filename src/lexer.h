@@ -99,7 +99,7 @@ void Lexer::add(char c, string currentLineContent, int line, int col)
     if (parseIdentifier(c, currentLineContent, line, col)) return;
     if (parseEOF(c, currentLineContent, line, col)) return;
 
-    SyntaxError(currentTokenLine, currentTokenCol, currentLineContent, &"Invalid character: " [c]);
+    SyntaxError(currentTokenLine, currentCol, currentLineContent, &"Invalid character: " [c]);
 }
 
 bool Lexer::parseString(char c, string currentLineContent, int line, int col)
@@ -112,7 +112,7 @@ bool Lexer::parseString(char c, string currentLineContent, int line, int col)
             currentTokenType = T_STR;
             return true;
         }
-        SyntaxError(currentTokenLine, currentTokenCol, currentLineContent, "Invalid operator");
+        SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid operator");
     }
     if (currentTokenType == T_STR && c != openedTags.top())
     {
@@ -181,7 +181,7 @@ bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
                 }
                 else
                 {
-                    SyntaxError(currentTokenLine, currentTokenCol, currentLineContent, "Invalid operator: " + currentTokenValue + c);
+                    SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid operator: " + currentTokenValue + c);
                 }
                 
             }
@@ -189,7 +189,7 @@ bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
             {
                 if (currentTokenValue.length() >= 2)
                 {
-                    SyntaxError(currentTokenLine, currentTokenCol, currentLineContent, "Invalid operator: " + currentTokenValue + c);
+                    SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid operator: " + currentTokenValue + c);
                 }
                 switch (currentTokenValue[0])
                 {
@@ -202,7 +202,7 @@ bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
                     }
                     default:
                     {
-                        SyntaxError(currentTokenLine, currentTokenCol, currentLineContent, "Invalid operator: " + currentTokenValue + c);
+                        SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid operator: " + currentTokenValue + c);
                     }
                     return true;
                 }
@@ -318,13 +318,13 @@ bool Lexer::parseIdentifier(char c, string currentLineContent, int line, int col
     {
         // todo: add identifier validation
         if (isAlpha(c) || c == '_' || isNumber(c)) currentTokenValue += c;
-        else SyntaxError(currentTokenLine, currentTokenCol, currentLineContent, "Invalid syntax: " + currentTokenValue + c);
+        else SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid syntax: " + currentTokenValue + c);
         return true;
     }
 
     if (currentTokenType != T_VAR)
     {
-        if (currentTokenType == T_INT || currentTokenType == T_FLOAT) SyntaxError(currentTokenLine, currentTokenCol, currentLineContent, "Invalid syntax: " + currentTokenValue + c);
+        if (currentTokenType == T_INT || currentTokenType == T_FLOAT) SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid syntax: " + currentTokenValue + c);
 
         pushCurrentToken();
         if (isAlpha(c) || c == '_')
@@ -371,7 +371,7 @@ Token Lexer::front()
 
 void Lexer::pushEOL(string currentLineContent)
 {
-    if (currentTokenType == T_STR) SyntaxError(currentTokenLine, currentTokenCol, currentLineContent, "Invalid syntax");
+    if (currentTokenType == T_STR) SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid syntax");
 
     if (currentTokenType != T_NONE && currentTokenType != T_COMMENT)
         pushCurrentToken();
