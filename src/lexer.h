@@ -363,17 +363,13 @@ Token Lexer::next()
     return token;
 }
 
-<<<<<<< HEAD
 Token Lexer::front()
 {
     if (tokens.empty()) return Token(currentTokenLine, currentTokenCol, T_EOF, "");
     return tokens.front();
 }
 
-void Lexer::pushEOL()
-=======
 void Lexer::pushEOL(string currentLineContent)
->>>>>>> 6fbcbe174aa19abf460b462a88073ac36e6ff5b3
 {
     if (currentTokenType == T_STR) SyntaxError(currentTokenLine, currentTokenCol, currentLineContent, "Invalid syntax");
 
