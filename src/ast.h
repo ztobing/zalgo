@@ -43,8 +43,9 @@ AST::AST(Token t)
 
 AST::~AST()
 {
-    if (left != NULL) delete left;
-    if (right != NULL) delete right;
+    // TODO: Fix memory allocation system
+    // if (left != NULL) delete left;
+    // if (right != NULL) delete right;
 }
 
 void AST::setLeft(AST a)
