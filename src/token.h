@@ -10,8 +10,16 @@ struct Token
     int type;
     string value;
     int line, col;
+    Token();
     Token(int line, int col, int type, string value);
 };
+
+Token::Token()
+{
+    type = 0;
+    line = col = -1;
+    value = "";
+}
 
 Token::Token(int line, int col, int type, string value)
 {
