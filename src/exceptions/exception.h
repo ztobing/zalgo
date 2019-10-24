@@ -13,8 +13,14 @@ struct Exception
 Exception::Exception(int line, int col, string currentLine, string type, string message)
 {
     cout << type << " at line " << line << ", col " << col << endl
-         << currentLine << endl
-         << message << endl;
+         << currentLine << endl;
+
+    for (int i = 0; i < col - 1; i++)
+    {
+        cout << " ";
+    }
+    cout << "^" << endl;
+    cout << message << endl;
     exit(1);
 }
 
