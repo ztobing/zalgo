@@ -47,7 +47,7 @@ Zalgo::Zalgo(string filePath)
         }
 
         // Push end of instruction token
-        lexer.pushEOL();
+        lexer.pushEOL(currentLine);
         lineNumber++;
         colNumber = 1;
     }

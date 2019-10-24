@@ -7,6 +7,7 @@
 #define T_COMMANDNEND 2
 #define T_EOF 3
 #define T_COMMENT 4
+#define T_ESC 5
 
 // Data types
 #define T_BOOL 10
@@ -24,6 +25,7 @@
 #define T_IF 30
 #define T_FOR 31
 #define T_WHILE 32
+#define T_THEN 38
 #define T_END 39
 
 // Separators
@@ -66,7 +68,7 @@ class Lexer
         Lexer();
         void add(char c, string currentLineContent, int line, int col);
         Token next();
-        void pushEOL();
+        void pushEOL(string currentLineContent);
         bool eof();
 };
 
@@ -101,9 +103,23 @@ void Lexer::add(char c, string currentLineContent, int line, int col)
 
 bool Lexer::parseString(char c, string currentLineContent, int line, int col)
 {
+    if (currentTokenType == T_ESC)
+    {
+        if (c == '"' || c == '\'')
+        {
+            currentTokenValue += c;
+            currentTokenType = T_STR;
+            return true;
+        }
+        SyntaxError(currentTokenLine, currentTokenCol, currentLineContent, "Invalid operator");
+    }
     if (currentTokenType == T_STR && c != openedTags.top())
     {
-        if (c == '/') return true;
+        if (c == '\\')
+        {
+            currentTokenType = T_ESC;
+            return true;
+        }
         currentTokenValue += c;
         return true;
     }
@@ -330,7 +346,6 @@ bool Lexer::parseEOF(char c, string currentLineContent, int line, int col)
     // Handle EOF
     if (c == -1)
     {
-
         pushCurrentToken();
         tokens.push(Token(currentTokenLine, currentTokenCol, T_EOF, ""));
         return true;
@@ -347,8 +362,10 @@ Token Lexer::next()
     return token;
 }
 
-void Lexer::pushEOL()
+void Lexer::pushEOL(string currentLineContent)
 {
+    if (currentTokenType == T_STR) SyntaxError(currentTokenLine, currentTokenCol, currentLineContent, "Invalid syntax");
+
     if (currentTokenType != T_NONE && currentTokenType != T_COMMENT)
         pushCurrentToken();
     tokens.push(Token(currentTokenLine, currentTokenCol, T_COMMANDNEND, ""));
