@@ -52,7 +52,6 @@ class Lexer
         void pushCurrentToken();
         void popSeparator(char);
         void setTokenPosition();
-        void printException(Exception);
         bool isAlpha(char);
         bool isNumber(char);
 
@@ -102,6 +101,7 @@ bool Lexer::parseString(char c, string currentLineContent, int line, int col)
 {
     if (currentTokenType == T_STR && c != openedTags.top())
     {
+        if (c == '/') return true;
         currentTokenValue += c;
         return true;
     }
@@ -162,7 +162,7 @@ bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
                 }
                 else
                 {
-                    // TODO: throw error
+                    SyntaxError(currentTokenLine, currentTokenCol, currentLineContent, "Invalid operator: " + currentTokenValue + c);
                 }
                 
             }
@@ -170,8 +170,7 @@ bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
             {
                 if (currentTokenValue.length() >= 2)
                 {
-                    printException(SyntaxError(currentTokenLine, currentTokenCol, currentLineContent, "Invalid operator: " + currentTokenValue + c));
-                    return true;
+                    SyntaxError(currentTokenLine, currentTokenCol, currentLineContent, "Invalid operator: " + currentTokenValue + c);
                 }
                 switch (currentTokenValue[0])
                 {
@@ -184,7 +183,7 @@ bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
                     }
                     default:
                     {
-                        // TODO: throw error
+                        SyntaxError(currentTokenLine, currentTokenCol, currentLineContent, "Invalid operator: " + currentTokenValue + c);
                     }
                     return true;
                 }
@@ -251,7 +250,7 @@ bool Lexer::parseNumber(char c, string currentLineContent, int line, int col)
     if (currentTokenType == T_FLOAT && c == '.')
     {
         // TODO: add exception
-        printException(Exception(line, col, currentLineContent, "asd", "asd test"));
+        Exception(line, col, currentLineContent, "asd", "asd test");
         return true;
     }
     
@@ -325,6 +324,7 @@ bool Lexer::parseEOF(char c, string currentLineContent, int line, int col)
     // Handle EOF
     if (c == -1)
     {
+
         pushCurrentToken();
         tokens.push(Token(currentTokenLine, currentTokenCol, T_EOF, ""));
         return true;
@@ -343,9 +343,11 @@ Token Lexer::next()
 
 void Lexer::pushEOL()
 {
-    if (currentTokenType != T_NONE && currentTokenType != T_COMMENT)
-        pushCurrentToken();
-    tokens.push(Token(currentTokenLine, currentTokenCol, T_COMMANDNEND, ""));
+    if (eof())
+    {
+        if (currentTokenType != T_NONE && currentTokenType != T_COMMENT) pushCurrentToken();
+        tokens.push(Token(currentTokenLine, currentTokenCol, T_COMMANDNEND, ""));
+    }
 }
 
 bool Lexer::eof()
@@ -387,14 +389,6 @@ void Lexer::setTokenPosition()
 {
     currentTokenLine = currentLine;
     currentTokenCol = currentCol;
-}
-
-void Lexer::printException(Exception e)
-{
-    cout << e.type << " at line " << e.line << ", col " << e.col << endl
-         << e.currentLine << endl
-         << e.message << endl;
-    exit(1);
 }
 
 bool Lexer::isAlpha(char c)
