@@ -95,6 +95,8 @@ void Lexer::add(char c, string currentLineContent, int line, int col)
     if (parseSpace(c, currentLineContent, line, col)) return;
     if (parseIdentifier(c, currentLineContent, line, col)) return;
     if (parseEOF(c, currentLineContent, line, col)) return;
+
+    SyntaxError(currentTokenLine, currentTokenCol, currentLineContent, &"Invalid character: " [c]);
 }
 
 bool Lexer::parseString(char c, string currentLineContent, int line, int col)
@@ -278,12 +280,12 @@ bool Lexer::parseSpace (char c, string currentLineValue, int line, int col)
             else if (currentTokenValue == "for")
             {
                 currentTokenType = T_FOR;
-                currentTokenValue = "";            
+                currentTokenValue = "";
             }
             else if (currentTokenValue == "while")
             {
                 currentTokenType = T_WHILE;
-                currentTokenValue = "";           
+                currentTokenValue = "";
             }
         }
         pushCurrentToken();
@@ -298,11 +300,15 @@ bool Lexer::parseIdentifier(char c, string currentLineContent, int line, int col
     if (currentTokenType == T_VAR)
     {
         // todo: add identifier validation
-        currentTokenValue += c;
+        if (isAlpha(c) || c == '_' || isNumber(c)) currentTokenValue += c;
+        else SyntaxError(currentTokenLine, currentTokenCol, currentLineContent, "Invalid syntax: " + currentTokenValue + c);
         return true;
     }
+
     if (currentTokenType != T_VAR)
     {
+        if (currentTokenType == T_INT || currentTokenType == T_FLOAT) SyntaxError(currentTokenLine, currentTokenCol, currentLineContent, "Invalid syntax: " + currentTokenValue + c);
+
         pushCurrentToken();
         if (isAlpha(c) || c == '_')
         {
@@ -343,11 +349,9 @@ Token Lexer::next()
 
 void Lexer::pushEOL()
 {
-    if (eof())
-    {
-        if (currentTokenType != T_NONE && currentTokenType != T_COMMENT) pushCurrentToken();
-        tokens.push(Token(currentTokenLine, currentTokenCol, T_COMMANDNEND, ""));
-    }
+    if (currentTokenType != T_NONE && currentTokenType != T_COMMENT)
+        pushCurrentToken();
+    tokens.push(Token(currentTokenLine, currentTokenCol, T_COMMANDNEND, ""));
 }
 
 bool Lexer::eof()
