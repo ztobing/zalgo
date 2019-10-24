@@ -67,6 +67,7 @@ class Lexer
         Lexer();
         void add(char c, string currentLineContent, int line, int col);
         Token next();
+        Token front();
         void pushEOL();
         bool eof();
 };
@@ -339,6 +340,12 @@ Token Lexer::next()
     Token token = tokens.front();
     tokens.pop();
     return token;
+}
+
+Token Lexer::front()
+{
+    if (tokens.empty()) return Token(currentTokenLine, currentTokenCol, T_EOF, "");
+    return tokens.front();
 }
 
 void Lexer::pushEOL()
