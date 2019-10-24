@@ -15,16 +15,24 @@ struct AST
     AST *right;
     Token value;
     AST();
+    AST(const AST&);
     AST(Token);
     ~AST();
-    void setLeft(Token);
-    void setRight(Token);
+    void setLeft(AST);
+    void setRight(AST);
 };
 
 AST::AST()
 {
     left = right = NULL;
     value = Token(-1, -1, -1, "");
+}
+
+AST::AST(const AST& a)
+{
+    left = a.left;
+    right = a.right;
+    value = a.value;
 }
 
 AST::AST(Token t)
@@ -39,16 +47,16 @@ AST::~AST()
     if (right != NULL) delete right;
 }
 
-void AST::setLeft(Token t)
+void AST::setLeft(AST a)
 {
     if (left != NULL) delete left;
-    left = new AST(t);
+    left = new AST(a);
 }
 
-void AST::setRight(Token t)
+void AST::setRight(AST a)
 {
     if (right != NULL) delete right;
-    right = new AST(t);
+    right = new AST(a);
 }
 
 #endif
