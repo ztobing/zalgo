@@ -83,6 +83,11 @@ AST Parser::factor()
         eat(T_RPAREN);
         return ast;
     }
+    if (token.type == T_VAR)
+    {
+        eat(T_VAR);
+        return AST(token);
+    }
 }
 
 AST Parser::term()
