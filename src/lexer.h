@@ -2,15 +2,15 @@
 #define LEXER_H
 
 // Reserved
-#define T_NONE 0
-#define T_NULL 1
-#define T_COMMANDNEND 2
-#define T_EOF 3
-#define T_COMMENT 4
-#define T_ESC 5
+#define T_NONE 0 // Default
+#define T_NULL 1 // NULL
+#define T_COMMANDNEND 2 // End of line
+#define T_EOF 3 // End of file
+#define T_COMMENT 4 // #
+#define T_ESC 5 // \
 
 // Data types
-#define T_BOOL 10
+#define T_BOOL 10 // true, false
 #define T_INT 11
 #define T_FLOAT 12
 #define T_STR 13
@@ -18,20 +18,23 @@
 #define T_FUNC 15
 
 // Operators
-#define T_OPR 20
-#define T_BINCMP 21
-#define T_BITCMP 22
+#define T_OPR 20 // +, -, /, *,  =, !, &
+#define T_BINCMP 21 // ==, +=, -=, *=, /=, !=, ++, --
+#define T_BITCMP 22 // &&, ||
 
 // Keywords
 #define T_IF 30
 #define T_FOR 31
 #define T_WHILE 32
+#define T_RETURN 37
 #define T_THEN 38
 #define T_END 39
 
 // Separators
-#define T_LPAREN 40
-#define T_RPAREN 41
+#define T_LPAREN 40 // (
+#define T_RPAREN 41 // )
+#define T_LBRACKET 42 // [
+#define T_RBRACKET 43 // ]
 
 #include <iostream>
 #include <queue>
