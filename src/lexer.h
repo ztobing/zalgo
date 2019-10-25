@@ -19,7 +19,8 @@
 
 // Operators
 #define T_OPR 20
-#define T_BINOP 21
+#define T_BINCMP 21
+#define T_BITCMP 22
 
 // Keywords
 #define T_IF 30
@@ -176,7 +177,7 @@ bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
             {
                 if (currentTokenValue == "=")
                 {
-                    currentTokenType = T_BINOP;
+                    currentTokenType = T_BINCMP;
                     currentTokenValue += "=";
                 }
                 else
@@ -185,7 +186,7 @@ bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
                 }
                 
             }
-            else if (currentTokenType == T_BINOP)
+            else if (currentTokenType == T_BINCMP)
             {
                 if (currentTokenValue.length() >= 2)
                 {
@@ -216,18 +217,18 @@ bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
         case '<':
         {
             pushCurrentToken();
-            currentTokenType = T_BINOP;
+            currentTokenType = T_BINCMP;
             currentTokenValue = c;
             return true;
         }
         case '!':
         {
-            if (currentTokenType == T_BINOP)
+            if (currentTokenType == T_BINCMP)
             {
                 // return error 
             }
             pushCurrentToken();
-            currentTokenType = T_BINOP;
+            currentTokenType = T_BINCMP;
             currentTokenValue = "!";
             return true;
         }
