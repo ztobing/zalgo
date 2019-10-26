@@ -23,9 +23,12 @@ class Parser
         AST assignStatement();
         AST compareStatement();
     public:
+        Parser();
         Parser(Lexer);
         void genAST();
 };
+
+Parser::Parser() {}
 
 Parser::Parser(Lexer lexer)
 {
