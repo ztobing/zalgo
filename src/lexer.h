@@ -26,6 +26,8 @@
 #define T_IF 30
 #define T_FOR 31
 #define T_WHILE 32
+#define T_DO 33
+#define T_PRINT 34
 #define T_RETURN 37
 #define T_THEN 38
 #define T_END 39
@@ -325,6 +327,31 @@ bool Lexer::parseSpace (char c, string currentLineValue, int line, int col)
             else if (currentTokenValue == "while")
             {
                 currentTokenType = T_WHILE;
+                currentTokenValue = "";
+            }
+            else if (currentTokenValue == "do")
+            {
+                currentTokenType = T_DO;
+                currentTokenValue = "";
+            }
+            else if (currentTokenValue == "print")
+            {
+                currentTokenType = T_PRINT;
+                currentTokenValue = "";
+            }
+            else if (currentTokenValue == "return")
+            {
+                currentTokenType = T_RETURN;
+                currentTokenValue = "";
+            }
+            else if (currentTokenValue == "then")
+            {
+                currentTokenType = T_THEN;
+                currentTokenValue = "";
+            }
+            else if (currentTokenValue == "end")
+            {
+                currentTokenType = T_END;
                 currentTokenValue = "";
             }
         }
