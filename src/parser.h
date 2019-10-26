@@ -20,6 +20,8 @@ class Parser
         AST factor();
         AST term();
         AST expr();
+        AST assignStatement();
+        AST compareStatement();
     public:
         Parser(Lexer);
         void genAST();
@@ -121,6 +123,32 @@ AST Parser::expr()
         node = newNode;
     }
     return node;
+}
+
+AST Parser::assignStatement()
+{
+    if (currentToken.type == T_VAR)
+    {
+        Token token = currentToken;
+        eat(T_VAR);
+        AST node(currentToken);
+        eat(T_OPR);
+        node.setLeft(token);
+        node.setRight(expr());
+        return node;
+    }
+    if (currentToken.type == T_FUNC)
+    {
+        // Token token = currentToken;
+        // eat(T_FUNC);
+        // AST node();
+        // TODO: Add function parsing
+    }
+}
+
+AST Parser::compareStatement()
+{
+    // TODO: Add statement parsing
 }
 
 #endif
