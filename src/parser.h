@@ -40,7 +40,7 @@ void Parser::genAST()
     while (result.right != NULL)
     {
         cout << "Visiting " << result.value.value << endl;
-        result = *result.left;
+        result = *result.right;
     }
 }
 
