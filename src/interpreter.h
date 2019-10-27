@@ -20,6 +20,7 @@ class Interpreter
         AST ast;
         map<string, Value> GLOBAL_SCOPE;
         Value visit(AST);
+        Value visitStatementList(AST);
         Value visitAssign(AST);
         Value visitOpr(AST);
         Value visitVar(AST);
@@ -54,12 +55,12 @@ Value Interpreter::visit(AST ast)
 
     switch (ast.type)
     {
+        case P_STATEMENTLIST:
+            return visitStatementList(ast);
         case T_ASSIGN:
             return visitAssign(ast);
-            break;
         case T_OPR:
             return visitOpr(ast);
-            break;
         default:
             break;
     }
@@ -67,6 +68,12 @@ Value Interpreter::visit(AST ast)
     // Postorder tasks
     // if (ast.right != NULL) visit(*ast.right);
     return Value(P_NOMATCH, "");
+}
+
+Value Interpreter::visitStatementList(AST ast)
+{
+    visit(*ast.left);
+    return visit(*ast.right);
 }
 
 Value Interpreter::visitAssign(AST ast)
