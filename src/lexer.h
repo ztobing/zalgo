@@ -396,6 +396,11 @@ void Lexer:: parseIdentifier()
             currentTokenType = T_END;
             currentTokenValue = "";
         }
+        else if (currentTokenValue == "func" || currentTokenValue == "function")
+        {
+            currentTokenType = T_FUNC;
+            currentTokenValue = "";
+        }
     }
 }
 
