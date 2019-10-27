@@ -28,8 +28,8 @@ AST::AST(const AST& a)
 {
     this->type = a.type;
     this->value = a.value;
-    this->left = a.left != NULL ? a.left : NULL;
-    this->right = a.right != NULL ? a.right : NULL;
+    this->left = a.left != NULL ? new AST(*a.left) : NULL;
+    this->right = a.right != NULL ? new AST(*a.right) : NULL;
 }
 
 #endif
