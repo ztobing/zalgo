@@ -94,7 +94,6 @@ AST Parser::statementList()
     cout << "statement_list START" << endl;
 
     AST statementListNode = statement();
-    // eat(T_COMMANDNEND);
 
     while (currentToken.type == T_COMMANDNEND)
     {
@@ -118,12 +117,17 @@ AST Parser::statement()
 
     AST statementNode(P_STATEMENT, "");
     // Block Statement
+
+
     // Assignment Statement
     statementNode = assignStatement();
     if (statementNode.type != P_NOMATCH) return statementNode;
     // Comparison Statement
+
     // Call Statement
+
     // Empty Statement
+    
     // Unknown
     cout << "statement END" << endl;
     return AST(P_NOMATCH, "");
