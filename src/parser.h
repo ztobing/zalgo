@@ -6,7 +6,6 @@
 #define P_STATEMENTLIST 102
 
 #include <iostream>
-#include <queue>
 
 #include "token.h"
 #include "lexer.h"
@@ -93,7 +92,6 @@ AST Parser::statementList()
     // statement NEWLINE statement_list 
     cout << "statement_list START" << endl;
 
-    // Token token = currentToken;
     AST statementListNode = statement();
     eat(T_COMMANDNEND);
 
