@@ -94,17 +94,17 @@ AST Parser::statementList()
     cout << "statement_list START" << endl;
 
     AST statementListNode = statement();
-    eat(T_COMMANDNEND);
+    // eat(T_COMMANDNEND);
 
     while (currentToken.type == T_COMMANDNEND)
     {
+        eat(T_COMMANDNEND);
         AST newStatementListNode(P_STATEMENTLIST, "");
         newStatementListNode.left = new AST(statementListNode);
         AST rightNode = statementList();
         if (rightNode.type == P_NOMATCH) return statementListNode;
         newStatementListNode.right = new AST(rightNode);
         statementListNode = newStatementListNode;
-        eat(T_COMMANDNEND);
     }
     cout << "statement_list END" << endl;
     return statementListNode;
@@ -126,7 +126,7 @@ AST Parser::statement()
     // Empty Statement
     // Unknown
     cout << "statement END" << endl;
-    // return AST(P_NOMATCH, "");
+    return AST(P_NOMATCH, "");
 }
 
 AST Parser::assignStatement()
