@@ -6,6 +6,7 @@
 
 #include "lexer.h"
 #include "parser.h"
+#include "interpreter.h"
 
 using namespace std;
 
@@ -68,7 +69,8 @@ Zalgo::Zalgo(string filePath)
     // !! Temporary code !!
     // Prints the parse tree
     Parser parser(lexer);
-    parser.printInOrder(parser.genAST());
+    Interpreter interpreter(parser.genAST());
+    interpreter.interpret();
 }
 
 #endif
