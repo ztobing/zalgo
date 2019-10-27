@@ -18,9 +18,10 @@
 #define T_FUNC 15
 
 // Operators
-#define T_OPR 20 // +, -, /, *,  >, <, =, !
-#define T_BINCMP 21 // ==, +=, -=, *=, /=, >=, <=, !=, ++, --
-#define T_BITCMP 22 // &&, ||
+#define T_OPR 20 // +, -, /, *,  >, <
+#define T_ASSIGN 21 // =, !
+#define T_BINCMP 22 // ==, +=, -=, *=, /=, >=, <=, !=, ++, --
+#define T_BITCMP 23 // &&, ||
 
 // Keywords
 #define T_IF 30
@@ -178,18 +179,15 @@ bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
         }
         case '=':
         {
-            if (currentTokenType == T_OPR)
+            if (currentTokenType == T_OPR || currentTokenType == T_ASSIGN)
             {
                 if (currentTokenValue == "=")
                 {
                     currentTokenType = T_BINCMP;
                     currentTokenValue += "=";
+                    return true;
                 }
-                else
-                {
-                    SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid operator: " + currentTokenValue + c);
-                }
-                
+                SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid operator: " + currentTokenValue + c);
             }
             else if (currentTokenType == T_BINCMP)
             {
@@ -214,7 +212,7 @@ bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
                 }
             }
             pushCurrentToken();
-            currentTokenType = T_OPR;
+            currentTokenType = T_ASSIGN;
             currentTokenValue = "=";
             return true;
         }
