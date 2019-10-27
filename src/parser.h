@@ -1,6 +1,10 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#define P_NOMATCH 100
+#define P_STATEMENT 101
+#define P_STATEMENTLIST 102
+
 #include <iostream>
 #include <queue>
 
@@ -16,10 +20,17 @@ class Parser
         Lexer lexer;
         Token currentToken;
         bool eat(int);
+        bool peek(int);
 
+        AST program();
+        AST statementList();
+        AST statement();
+        AST assignStatement();
         AST expr();
         AST term();
         AST factor();
+        AST variable();
+        AST function();
     public:
         Parser();
         Parser(Lexer);
@@ -36,7 +47,7 @@ Parser::Parser(Lexer lexer)
 
 AST Parser::genAST()
 {
-    AST result = expr();
+    AST result = program();
     AST temp = result;
     while (temp.right != NULL)
     {
@@ -56,8 +67,83 @@ bool Parser::eat(int type)
     return false;
 }
 
+bool Parser::peek(int type)
+{
+    if (this->currentToken.type == type) return true;
+    return false;
+}
+
+AST Parser::program()
+{
+    // program
+    // statement_list EOF
+    cout << "program START" << endl;
+
+    AST programNode = statementList();
+    if (!eat(T_EOF)) cout << "EOF NOT FOUND" << endl; // Throw exception
+    return programNode;
+}
+
+AST Parser::statementList()
+{
+    // statement_list
+    // statement NEWLINE statement_list 
+    cout << "statement_list START" << endl;
+
+    // Token token = currentToken;
+    AST statementListNode = statement();
+    
+    while (currentToken.type == T_COMMANDNEND)
+    {
+        AST newStatementListNode(P_STATEMENTLIST, "");
+        newStatementListNode.left = new AST(statementListNode);
+        newStatementListNode.right = new AST(statementList());
+        statementListNode = newStatementListNode;
+        eat(T_COMMANDNEND);
+    }
+    cout << "statement_list END" << endl;
+    return statementListNode;
+}
+
+AST Parser::statement()
+{
+    cout << "statement START" << endl;
+
+    AST statementNode(P_STATEMENT, "");
+    // Block Statement
+    // Assignment Statement
+    statementNode = assignStatement();
+    if (statementNode.type != P_NOMATCH) return statementNode;
+    // Comparison Statement
+    // Call Statement
+    // Empty Statement
+    // Unknown
+    cout << "statement END" << endl;
+}
+
+AST Parser::assignStatement()
+{
+    // assign_statement
+    // variable ASSIGN expr
+    cout << "assignStatement START" << endl;
+
+    Token varToken = currentToken;
+    if (!eat(T_VAR)) return AST(P_NOMATCH, "");
+    AST assignNode(T_ASSIGN, "");
+    if (!peek(T_ASSIGN)) { currentToken = varToken; return AST(P_NOMATCH, ""); }
+    eat(T_ASSIGN);
+    assignNode.left = new AST(T_VAR, varToken.value);
+    assignNode.right = new AST(expr());
+    cout << "assignStatement END" << endl;
+    return assignNode;
+}
+
 AST Parser::expr()
 {
+    // expr
+    //
+    cout << "expr START" << endl;
+
     Token token = currentToken;
     AST exprNode = term();
     while (currentToken.type == T_OPR && (currentToken.value == "+" || currentToken.value == "-"))
@@ -69,11 +155,16 @@ AST Parser::expr()
         newExprNode.right = new AST(term());
         exprNode = newExprNode;
     }
+    cout << "expr END" << endl;
     return exprNode;
 }
 
 AST Parser::term()
 {
+    // term
+    //
+    cout << "term START" << endl;
+
     AST termNode = factor();
     while (currentToken.type == T_OPR && (currentToken.value == "*" || currentToken.value == "/"))
     {
@@ -84,6 +175,7 @@ AST Parser::term()
         newTermNode.right = new AST(factor());
         termNode = newTermNode;
     }
+    cout << "term END" << endl;
     return termNode;
 }
 
@@ -124,12 +216,32 @@ AST Parser::factor()
     // Variable
     if (currentToken.type == T_VAR)
     {
-        if (!eat(T_VAR)); // Throw exception
-        AST ast(T_VAR, token.value);
-        return ast;
+        return variable();
     }
     // Unknown
     // Throw exception
+}
+
+AST Parser::variable()
+{
+    // variable
+    // T_VAR
+
+    Token token = currentToken;
+    if (!eat(T_VAR)) return AST(P_NOMATCH, "");
+    AST variableNode(T_VAR, token.value);
+    return variableNode;
+}
+
+AST Parser::function()
+{
+    // function
+    // T_FUNC
+
+    Token token = currentToken;
+    if (!eat(T_FUNC)) return AST(P_NOMATCH, "");
+    AST functionNode(T_VAR, token.value);
+    return functionNode;
 }
 
 #endif
