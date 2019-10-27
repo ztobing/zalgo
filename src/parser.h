@@ -4,6 +4,7 @@
 #define P_NOMATCH 100
 #define P_STATEMENT 101
 #define P_STATEMENTLIST 102
+#define P_FUNCTION 103
 
 #include <iostream>
 
@@ -131,18 +132,43 @@ AST Parser::statement()
 AST Parser::assignStatement()
 {
     // assign_statement
-    // variable ASSIGN expr
+    // variable ASSIGN expr | function variable LPAREN (variable (COMMA variable)*)* RPAREN NEWLINE 
     cout << "assignStatement START" << endl;
 
-    Token varToken = currentToken;
-    if (!eat(T_VAR)) return AST(P_NOMATCH, "");
-    AST assignNode(T_ASSIGN, "=");
-    if (!peek(T_ASSIGN)) { currentToken = varToken; return AST(P_NOMATCH, ""); }
-    eat(T_ASSIGN);
-    assignNode.left = new AST(T_VAR, varToken.value);
-    assignNode.right = new AST(expr());
-    cout << "assignStatement END" << endl;
-    return assignNode;
+    // Variable definition
+    if (currentToken.type == T_VAR)
+    {
+        Token varToken = currentToken;
+        if (!eat(T_VAR)) return AST(P_NOMATCH, "");
+        AST assignNode(T_ASSIGN, "=");
+        if (!peek(T_ASSIGN)) { currentToken = varToken; return AST(P_NOMATCH, ""); }
+        eat(T_ASSIGN);
+        assignNode.left = new AST(T_VAR, varToken.value);
+        assignNode.right = new AST(expr());
+        cout << "assignStatement END" << endl;
+        return assignNode;
+    }
+    // Function definition
+    if (currentToken.type == T_FUNC)
+    {
+        eat(T_FUNC);
+        Token funcToken = currentToken;
+        eat(T_VAR);
+        AST functionNode(P_FUNCTION, funcToken.value);
+        if (!eat(T_LPAREN)); // Throw exception
+        if (peek(T_VAR))
+        {
+            // Add parameter processing
+        }
+        if (!eat(T_RPAREN)); // Throw exception
+        if (!eat(T_COMMANDNEND)); // Throw exception
+        // functionNode.left = new AST(); // Add parameter list
+        functionNode.right = new AST(statementList());
+        if (!eat(T_END)) cout << "END NOT FOUND" << endl; // Throw exception
+        if (!eat(T_FUNC)) cout << "END_FUNC NOT FOUND" << endl; // Throw exception
+        return functionNode;
+    }
+    return AST(P_NOMATCH, "");
 }
 
 AST Parser::expr()
