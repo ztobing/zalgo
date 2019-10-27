@@ -26,11 +26,13 @@ class Parser
         AST statementList();
         AST statement();
         AST assignStatement();
+        AST compareStatement();
         AST expr();
         AST term();
         AST factor();
         AST variable();
         AST function();
+        AST string();
     public:
         Parser();
         Parser(Lexer);
@@ -112,22 +114,26 @@ AST Parser::statementList()
 AST Parser::statement()
 {
     // statement
-    // block_statement | assignment_statement | comparison_statement | call_statement | empty
+    // block_statement | assignment_statement | compare_statement | call_statement | empty
     cout << "statement START" << endl;
 
     AST statementNode(P_STATEMENT, "");
+
     // Block Statement
 
 
     // Assignment Statement
     statementNode = assignStatement();
     if (statementNode.type != P_NOMATCH) return statementNode;
-    // Comparison Statement
 
     // Call Statement
 
+    // Compare Statement
+    // statementNode = compareStatement();
+    // if (statementNode.type != P_NOMATCH) return statementNode;
+
     // Empty Statement
-    
+
     // Unknown
     cout << "statement END" << endl;
     return AST(P_NOMATCH, "");
@@ -175,6 +181,21 @@ AST Parser::assignStatement()
     return AST(P_NOMATCH, "");
 }
 
+AST Parser::compareStatement()
+{
+    // compare_statement
+    // expr COMPARE expr
+
+    AST leftExpr = expr();
+    Token compareToken = currentToken;
+    if (!eat(T_BINCMP) || !eat(T_BITCMP)) return AST(P_NOMATCH, ""); // Throw exception
+    AST rightExpr = expr();
+    AST compareAST(compareToken.type, compareToken.value);
+    compareAST.left = new AST(leftExpr);
+    compareAST.right = new AST(rightExpr);
+    return compareAST;
+}
+
 AST Parser::expr()
 {
     // expr
@@ -219,7 +240,7 @@ AST Parser::term()
 AST Parser::factor()
 {
     // factor
-    // PLUS factor | MIN factor | INT | LPAREN expr RPAREN | variable
+    // PLUS factor | MIN factor | INT | LPAREN expr RPAREN | variable | string
 
     Token token = currentToken;
     cout << "Factor: " << currentToken.value << endl;
@@ -258,6 +279,11 @@ AST Parser::factor()
     {
         return variable();
     }
+    // String
+    if (currentToken.type == T_STR)
+    {
+        return string();
+    }
     // Unknown
     // Throw exception
 }
@@ -282,6 +308,17 @@ AST Parser::function()
     if (!eat(T_FUNC)) return AST(P_NOMATCH, "");
     AST functionNode(T_VAR, token.value);
     return functionNode;
+}
+
+AST Parser::string()
+{
+    // function
+    // T_FUNC
+
+    Token token = currentToken;
+    if (!eat(T_STR)) return AST(P_NOMATCH, "");
+    AST stringNode(T_STR, token.value);
+    return stringNode;
 }
 
 #endif
