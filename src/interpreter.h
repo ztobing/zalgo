@@ -78,18 +78,24 @@ Value Interpreter::visitAssign(AST ast)
 
 Value Interpreter::visitOpr(AST ast)
 {
+    // --- BASE CASE --- //
+    if ((ast.type == T_INT || ast.type == T_FLOAT) && ast.left == nullptr && ast.right == nullptr)
+    {
+        return Value(ast.type, ast.value);
+    }
+
     // --- UNARY --- //
     if ((ast.value == "-" || ast.value == "+") && ast.right == NULL)
     {
         if (ast.left->type == T_INT)
         {
-            if (ast.value == "-") return Value(T_INT, to_string(-stoi(ast.left->value)));
-            if (ast.value == "+") return Value(T_INT, to_string(+stoi(ast.left->value)));
+            if (ast.value == "-") return Value(T_INT, to_string(-stoi(visitOpr(*ast.left).value)));
+            if (ast.value == "+") return Value(T_INT, to_string(+stoi(visitOpr(*ast.left).value)));
         }
         else if (ast.left->type == T_FLOAT)
         {
-            if (ast.value == "-") return Value(T_FLOAT, to_string(-stod(ast.left->value)));
-            if (ast.value == "+") return Value(T_FLOAT, to_string(+stod(ast.left->value)));
+            if (ast.value == "-") return Value(T_FLOAT, to_string(-stod(visitOpr(*ast.left).value)));
+            if (ast.value == "+") return Value(T_FLOAT, to_string(+stod(visitOpr(*ast.left).value)));
         }
     }
 
