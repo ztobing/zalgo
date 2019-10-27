@@ -70,6 +70,7 @@ class Lexer
         bool parseNumber(char c, string currentLineContent, int line, int col);
         bool parseSpace(char c, string currentLineContent, int line, int col);
         bool parseIdentifier(char c, string currentLineContent, int line, int col);
+        void parseIdentifier();
         bool parseEOF(char c, string currentLineContent, int line, int col);
     public:
         Lexer();
@@ -93,9 +94,9 @@ void Lexer::add(char c, string currentLineContent, int line, int col)
     currentCol = col;
 
     // !! Temporary code !!
-    cout << "CHECK " << c << endl;
-    cout << "CURRENT " << currentTokenType << endl;
-    cout << "        " << currentTokenValue << endl;
+    // cout << "CHECK " << c << endl;
+    // cout << "CURRENT " << currentTokenType << endl;
+    // cout << "        " << currentTokenValue << endl;
 
     // Process input according to the lexer order of precedence
     if (parseString(c, currentLineContent, line, col)) return;
@@ -310,7 +311,47 @@ bool Lexer::parseSpace (char c, string currentLineValue, int line, int col)
     // Handle space and keywords
     if (c == ' ')
     {
-        if (currentTokenType == T_VAR)
+        parseIdentifier();
+        pushCurrentToken();
+        return true;
+    }
+    return false;
+}
+
+bool Lexer::parseIdentifier(char c, string currentLineContent, int line, int col)
+{
+    // Handle identifiers
+    if (currentTokenType == T_VAR)
+    {
+        // todo: add identifier validation
+        if (isAlpha(c) || c == '_' || isNumber(c)) currentTokenValue += c;
+        else SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid syntax: " + currentTokenValue + c);
+        return true;
+    }
+
+    if (currentTokenType != T_VAR)
+    {
+        if (currentTokenType == T_INT || currentTokenType == T_FLOAT) SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid syntax: " + currentTokenValue + c);
+
+        pushCurrentToken();
+        if (isAlpha(c) || c == '_')
+        {
+            currentTokenType = T_VAR;
+            currentTokenValue = c;
+        }
+        else
+        {
+            // TODO: Add parse error exception
+        }
+        
+        return true;
+    }
+    return false;
+}
+
+void Lexer:: parseIdentifier()
+{
+    if (currentTokenType == T_VAR)
         {
             if (currentTokenValue == "if")
             {
@@ -353,41 +394,6 @@ bool Lexer::parseSpace (char c, string currentLineValue, int line, int col)
                 currentTokenValue = "";
             }
         }
-        pushCurrentToken();
-        return true;
-    }
-    return false;
-}
-
-bool Lexer::parseIdentifier(char c, string currentLineContent, int line, int col)
-{
-    // Handle identifiers
-    if (currentTokenType == T_VAR)
-    {
-        // todo: add identifier validation
-        if (isAlpha(c) || c == '_' || isNumber(c)) currentTokenValue += c;
-        else SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid syntax: " + currentTokenValue + c);
-        return true;
-    }
-
-    if (currentTokenType != T_VAR)
-    {
-        if (currentTokenType == T_INT || currentTokenType == T_FLOAT) SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid syntax: " + currentTokenValue + c);
-
-        pushCurrentToken();
-        if (isAlpha(c) || c == '_')
-        {
-            currentTokenType = T_VAR;
-            currentTokenValue = c;
-        }
-        else
-        {
-            // TODO: Add parse error exception
-        }
-        
-        return true;
-    }
-    return false;
 }
 
 bool Lexer::parseEOF(char c, string currentLineContent, int line, int col)
@@ -422,6 +428,7 @@ void Lexer::pushEOL(string currentLineContent)
     if (currentTokenType == T_STR) SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid syntax");
 
     if (currentTokenType != T_NONE && currentTokenType != T_COMMENT)
+        parseIdentifier();
         pushCurrentToken();
     tokens.push(Token(currentTokenLine, currentTokenCol, T_COMMANDNEND, ""));
 }
