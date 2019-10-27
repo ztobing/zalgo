@@ -297,6 +297,7 @@ AST Parser::factor()
     }
     // Unknown
     // Throw exception
+    return AST(P_NOMATCH, "");
 }
 
 AST Parser::variable()

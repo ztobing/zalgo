@@ -66,6 +66,7 @@ Value Interpreter::visit(AST ast)
 
     // Postorder tasks
     // if (ast.right != NULL) visit(*ast.right);
+    return Value(P_NOMATCH, "");
 }
 
 Value Interpreter::visitAssign(AST ast)
@@ -224,7 +225,7 @@ Value Interpreter::visitVar(AST ast)
     ; // Throw exception
     if (GLOBAL_SCOPE.find(ast.value) == GLOBAL_SCOPE.end())
     ; // Throw exception
-    else return GLOBAL_SCOPE[ast.value];
+    return GLOBAL_SCOPE[ast.value];
 }
 
 #endif
