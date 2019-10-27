@@ -72,7 +72,8 @@ Value Interpreter::visitAssign(AST ast)
 {
     string identifier = ast.left->value;
     Value rightHandValue = visit(*ast.right);
-    if (rightHandValue.type == I_NOMATCH); // Throw exception
+    if (rightHandValue.type == I_NOMATCH)
+    ; // Throw exception
     GLOBAL_SCOPE[identifier] =  rightHandValue;
     return Value(I_COMPLETE, "");
 }
@@ -219,8 +220,10 @@ Value Interpreter::visitOpr(AST ast)
 
 Value Interpreter::visitVar(AST ast)
 {
-    if (ast.type != T_VAR); // Throw exception
-    if (GLOBAL_SCOPE.find(ast.value) == GLOBAL_SCOPE.end()); // Throw exception
+    if (ast.type != T_VAR)
+    ; // Throw exception
+    if (GLOBAL_SCOPE.find(ast.value) == GLOBAL_SCOPE.end())
+    ; // Throw exception
     else return GLOBAL_SCOPE[ast.value];
 }
 
