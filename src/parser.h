@@ -110,6 +110,8 @@ AST Parser::statementList()
 
 AST Parser::statement()
 {
+    // statement
+    // block_statement | assignment_statement | comparison_statement | call_statement | empty
     cout << "statement START" << endl;
 
     AST statementNode(P_STATEMENT, "");
@@ -145,7 +147,7 @@ AST Parser::assignStatement()
 AST Parser::expr()
 {
     // expr
-    //
+    // term ((ADD | SUB) term)*
     cout << "expr START" << endl;
 
     Token token = currentToken;
@@ -166,7 +168,7 @@ AST Parser::expr()
 AST Parser::term()
 {
     // term
-    //
+    // factor ((MUL | DIV) factor)*
     cout << "term START" << endl;
 
     AST termNode = factor();
@@ -185,6 +187,9 @@ AST Parser::term()
 
 AST Parser::factor()
 {
+    // factor
+    // PLUS factor | MIN factor | INT | LPAREN expr RPAREN | variable
+
     Token token = currentToken;
     cout << "Factor: " << currentToken.value << endl;
     // Unary plus/minus
