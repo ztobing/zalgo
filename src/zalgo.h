@@ -68,7 +68,7 @@ Zalgo::Zalgo(string filePath)
     // !! Temporary code !!
     // Prints the parse tree
     Parser parser(lexer);
-    parser.genAST();
+    parser.printInOrder(parser.genAST());
 }
 
 #endif
