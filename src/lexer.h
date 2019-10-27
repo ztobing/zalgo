@@ -58,6 +58,7 @@ class Lexer
         int currentTokenType;
         string currentTokenValue;
         int currentLine, currentCol, currentTokenLine, currentTokenCol;
+        int currentTokenCount;
         void pushCurrentToken();
         void popSeparator(char);
         void setTokenPosition();
@@ -84,6 +85,7 @@ class Lexer
 Lexer::Lexer()
 {
     this->currentTokenType = 0;
+    this->currentTokenCount = 0;
     this->currentTokenValue = "";
     this->currentLine = this->currentCol = this->currentTokenLine = this->currentTokenCol = 1;
 }
@@ -92,6 +94,7 @@ void Lexer::add(char c, string currentLineContent, int line, int col)
 {
     currentLine = line;
     currentCol = col;
+    currentTokenCount++;
 
     // !! Temporary code !!
     // cout << "CHECK " << c << endl;
@@ -430,7 +433,8 @@ void Lexer::pushEOL(string currentLineContent)
     if (currentTokenType != T_NONE && currentTokenType != T_COMMENT)
         parseIdentifier();
         pushCurrentToken();
-    tokens.push(Token(currentTokenLine, currentTokenCol, T_COMMANDNEND, ""));
+    if (tokens.size() != currentTokenCount) tokens.push(Token(currentTokenLine, currentTokenCol, T_COMMANDNEND, ""));
+    currentTokenCount = tokens.size();
 }
 
 bool Lexer::eof()
