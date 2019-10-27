@@ -355,48 +355,48 @@ bool Lexer::parseIdentifier(char c, string currentLineContent, int line, int col
 void Lexer:: parseIdentifier()
 {
     if (currentTokenType == T_VAR)
+    {
+        if (currentTokenValue == "if")
         {
-            if (currentTokenValue == "if")
-            {
-                currentTokenType = T_IF;
-                currentTokenValue = "";
-            }
-            else if (currentTokenValue == "for")
-            {
-                currentTokenType = T_FOR;
-                currentTokenValue = "";
-            }
-            else if (currentTokenValue == "while")
-            {
-                currentTokenType = T_WHILE;
-                currentTokenValue = "";
-            }
-            else if (currentTokenValue == "do")
-            {
-                currentTokenType = T_DO;
-                currentTokenValue = "";
-            }
-            else if (currentTokenValue == "print")
-            {
-                currentTokenType = T_PRINT;
-                currentTokenValue = "";
-            }
-            else if (currentTokenValue == "return")
-            {
-                currentTokenType = T_RETURN;
-                currentTokenValue = "";
-            }
-            else if (currentTokenValue == "then")
-            {
-                currentTokenType = T_THEN;
-                currentTokenValue = "";
-            }
-            else if (currentTokenValue == "end")
-            {
-                currentTokenType = T_END;
-                currentTokenValue = "";
-            }
+            currentTokenType = T_IF;
+            currentTokenValue = "";
         }
+        else if (currentTokenValue == "for")
+        {
+            currentTokenType = T_FOR;
+            currentTokenValue = "";
+        }
+        else if (currentTokenValue == "while")
+        {
+            currentTokenType = T_WHILE;
+            currentTokenValue = "";
+        }
+        else if (currentTokenValue == "do")
+        {
+            currentTokenType = T_DO;
+            currentTokenValue = "";
+        }
+        else if (currentTokenValue == "print")
+        {
+            currentTokenType = T_PRINT;
+            currentTokenValue = "";
+        }
+        else if (currentTokenValue == "return")
+        {
+            currentTokenType = T_RETURN;
+            currentTokenValue = "";
+        }
+        else if (currentTokenValue == "then")
+        {
+            currentTokenType = T_THEN;
+            currentTokenValue = "";
+        }
+        else if (currentTokenValue == "end")
+        {
+            currentTokenType = T_END;
+            currentTokenValue = "";
+        }
+    }
 }
 
 bool Lexer::parseEOF(char c, string currentLineContent, int line, int col)
