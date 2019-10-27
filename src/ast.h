@@ -13,10 +13,18 @@ struct AST
     AST* right;
     int type;
     string value;
+    AST();
     AST(int, string);
     AST(const AST&);
     ~AST();
 };
+
+AST::AST()
+{
+    this->type = T_NONE;
+    this->value = "";
+    this->left = this->right = nullptr;
+}
 
 AST::AST(int type, string value)
 {
