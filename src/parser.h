@@ -35,6 +35,7 @@ class Parser
         Parser();
         Parser(Lexer);
         AST genAST();
+        void printInOrder(AST);
 };
 
 Parser::Parser() {}
@@ -49,12 +50,14 @@ AST Parser::genAST()
 {
     AST result = program();
     AST temp = result;
-    while (temp.right != NULL)
-    {
-        cout << temp.right->value << endl;
-        temp = *temp.right;
-    }
     return result;
+}
+
+void Parser::printInOrder(AST ast)
+{
+    if (ast.left != NULL) printInOrder(*ast.left);
+    cout << ast.value << endl;
+    if (ast.right != NULL) printInOrder(*ast.right);
 }
 
 bool Parser::eat(int type)
@@ -135,7 +138,7 @@ AST Parser::assignStatement()
 
     Token varToken = currentToken;
     if (!eat(T_VAR)) return AST(P_NOMATCH, "");
-    AST assignNode(T_ASSIGN, "");
+    AST assignNode(T_ASSIGN, "=");
     if (!peek(T_ASSIGN)) { currentToken = varToken; return AST(P_NOMATCH, ""); }
     eat(T_ASSIGN);
     assignNode.left = new AST(T_VAR, varToken.value);
