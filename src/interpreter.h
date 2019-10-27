@@ -22,6 +22,7 @@ class Interpreter
         Value visit(AST);
         Value visitAssign(AST);
         Value visitOpr(AST);
+        Value visitVar(AST);
     public:
         Interpreter(AST);
         void interpret();
@@ -214,6 +215,13 @@ Value Interpreter::visitOpr(AST ast)
         }
     }
     return Value(I_NOMATCH, "");
+}
+
+Value Interpreter::visitVar(AST ast)
+{
+    if (ast.type != T_VAR); // Throw exception
+    if (GLOBAL_SCOPE.find(ast.value) == GLOBAL_SCOPE.end()); // Throw exception
+    else return GLOBAL_SCOPE[ast.value];
 }
 
 #endif
