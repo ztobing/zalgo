@@ -1,8 +1,6 @@
 #ifndef AST_H
 #define AST_H
 
-#define T_NONE 0
-
 #include <iostream>
 
 #include "token.h"
@@ -11,53 +9,27 @@ using namespace std;
 
 struct AST
 {
-    AST *left;
-    AST *right;
-    Token value;
-    AST();
+    AST* left;
+    AST* right;
+    int type;
+    string value;
+    AST(int, string);
     AST(const AST&);
-    AST(Token);
-    ~AST();
-    void setLeft(AST);
-    void setRight(AST);
 };
 
-AST::AST()
+AST::AST(int type, string value)
 {
-    left = right = NULL;
-    value = Token(-1, -1, -1, "");
+    this->type = type;
+    this->value = value;
+    this->left = this->right = NULL;
 }
 
 AST::AST(const AST& a)
 {
-    left = a.left;
-    right = a.right;
-    value = a.value;
-}
-
-AST::AST(Token t)
-{
-    left = right = NULL;
-    value = t;
-}
-
-AST::~AST()
-{
-    // TODO: Fix memory allocation system
-    // if (left != NULL) delete left;
-    // if (right != NULL) delete right;
-}
-
-void AST::setLeft(AST a)
-{
-    if (left != NULL) delete left;
-    left = new AST(a);
-}
-
-void AST::setRight(AST a)
-{
-    if (right != NULL) delete right;
-    right = new AST(a);
+    this->type = a.type;
+    this->value = a.value;
+    this->left = a.left != NULL ? a.left : NULL;
+    this->right = a.right != NULL ? a.right : NULL;
 }
 
 #endif

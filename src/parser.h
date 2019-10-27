@@ -15,17 +15,15 @@ class Parser
     private:
         Lexer lexer;
         Token currentToken;
-        void eat(int tokenType);
+        bool eat(int);
 
-        AST factor();
-        AST term();
         AST expr();
-        AST assignStatement();
-        AST compareStatement();
+        AST term();
+        AST factor();
     public:
         Parser();
         Parser(Lexer);
-        void genAST();
+        AST genAST();
 };
 
 Parser::Parser() {}
@@ -36,122 +34,102 @@ Parser::Parser(Lexer lexer)
     this->currentToken = this->lexer.next();
 }
 
-void Parser::genAST()
+AST Parser::genAST()
 {
     AST result = expr();
-    cout << result.value.value << endl;
-    while (result.right != NULL)
+    AST temp = result;
+    while (temp.right != NULL)
     {
-        cout << "Visiting " << result.value.value << endl;
-        result = *result.right;
+        cout << temp.right->value << endl;
+        temp = *temp.right;
     }
+    return result;
 }
 
-void Parser::eat(int tokenType)
+bool Parser::eat(int type)
 {
-    if (tokenType == currentToken.type) this->currentToken = this->lexer.next();
-    else {cout << "error gobs" << endl; exit(1);}
+    if (this->currentToken.type == type)
+    {
+        this->currentToken = this->lexer.next();
+        return true;
+    }
+    return false;
+}
+
+AST Parser::expr()
+{
+    Token token = currentToken;
+    AST exprNode = term();
+    while (currentToken.type == T_OPR && (currentToken.value == "+" || currentToken.value == "-"))
+    {
+        Token token = currentToken;
+        if (!eat(T_OPR)); // Throw exception
+        AST newExprNode(token.type, token.value);
+        newExprNode.left = new AST(exprNode);
+        newExprNode.right = new AST(term());
+        exprNode = newExprNode;
+    }
+    return exprNode;
+}
+
+AST Parser::term()
+{
+    AST termNode = factor();
+    while (currentToken.type == T_OPR && (currentToken.value == "*" || currentToken.value == "/"))
+    {
+        Token token = currentToken;
+        if (!eat(T_OPR)); // Throw exception
+        AST newTermNode(token.type, token.value);
+        newTermNode.left = new AST(termNode);
+        newTermNode.right = new AST(factor());
+        termNode = newTermNode;
+    }
+    return termNode;
 }
 
 AST Parser::factor()
 {
     Token token = currentToken;
-
-    if (token.type == T_OPR && token.value == "+")
+    cout << "Factor: " << currentToken.value << endl;
+    // Unary plus/minus
+    if (currentToken.type == T_OPR && (currentToken.value == "+" || currentToken.value == "-"))
     {
-        eat(T_OPR);
-        AST ast(token);
-        ast.setLeft(factor());
+        if (!eat(T_OPR)); // Throw exception
+        AST ast(T_OPR, token.value);
+        ast.left = new AST(factor());
         return ast;
     }
-    if (token.type == T_OPR && token.value == "-")
+    // Integer
+    if (currentToken.type == T_INT)
     {
-        eat(T_OPR);
-        AST ast(token);
-        ast.setLeft(factor());
+        if (!eat(T_INT)); // Throw exception
+        AST ast(T_INT, token.value);
         return ast;
     }
-    if (token.type == T_INT)
+    // Float
+    if (currentToken.type == T_FLOAT)
     {
-        eat(T_INT);
-        return AST(token);
+        if (!eat(T_FLOAT)); // Throw exception
+        AST ast(T_INT, token.value);
+        return ast;
     }
-    if (token.type == T_FLOAT)
+    // Parentheses
+    if (currentToken.type == T_LPAREN)
     {
-        eat(T_INT);
-        return AST(token);
-    }
-    if (token.type == T_LPAREN)
-    {
-        eat(T_LPAREN);
+        if (!eat(T_LPAREN)); // Throw exception
         AST ast = expr();
-        eat(T_RPAREN);
+        if (!eat(T_RPAREN)); // Throw exception
         return ast;
     }
-    if (token.type == T_VAR)
-    {
-        eat(T_VAR);
-        return AST(token);
-    }
-}
-
-AST Parser::term()
-{
-    AST node = factor();
-
-    while (currentToken.type == T_OPR && (currentToken.value == "*" || currentToken.value == "/"))
-    {
-        Token token = currentToken;
-        eat(T_OPR);
-        AST newNode(token);
-        newNode.setLeft(node);
-        newNode.setRight(factor());
-        node = newNode;
-    }
-    return node;
-}
-
-AST Parser::expr()
-{
-    cout << "Expr " << currentToken.value << endl;
-    AST node = term();
-
-    while (currentToken.type == T_OPR && (currentToken.value == "+" || currentToken.value == "-"))
-    {
-        Token token = currentToken;
-        eat(T_OPR);
-        AST newNode(token);
-        newNode.setLeft(node);
-        newNode.setRight(term());
-        node = newNode;
-    }
-    return node;
-}
-
-AST Parser::assignStatement()
-{
+    // Variable
     if (currentToken.type == T_VAR)
     {
-        Token token = currentToken;
-        eat(T_VAR);
-        AST node(currentToken);
-        eat(T_OPR);
-        node.setLeft(token);
-        node.setRight(expr());
-        return node;
+        if (!eat(T_VAR)); // Throw exception
+        AST ast(T_VAR, token.value);
+        return ast;
     }
-    if (currentToken.type == T_FUNC)
-    {
-        // Token token = currentToken;
-        // eat(T_FUNC);
-        // AST node();
-        // TODO: Add function parsing
-    }
-}
-
-AST Parser::compareStatement()
-{
-    // TODO: Add statement parsing
+    // Unknown
+    // Throw exception
 }
 
 #endif
