@@ -9,8 +9,15 @@ struct Value
 {
     int type;
     string value;
+    Value();
     Value(int, string);
 };
+
+Value::Value()
+{
+    this->type = 0;
+    this->value = "";
+}
 
 Value::Value(int type, string value)
 {
