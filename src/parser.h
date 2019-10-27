@@ -272,7 +272,7 @@ AST Parser::factor()
     {
         if (!eat(T_FLOAT))
         ; // Throw exception
-        AST ast(T_INT, token.value);
+        AST ast(T_FLOAT, token.value);
         return ast;
     }
     // Parentheses
