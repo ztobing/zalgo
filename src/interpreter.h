@@ -23,6 +23,8 @@ class Interpreter
         Value visit(AST);
         Value visitStatementList(AST);
         Value visitAssign(AST);
+        Value visitIf(AST);
+        Value visitCompare(AST);
         Value visitOpr(AST);
         Value visitVar(AST);
         Value visitInt(AST);
@@ -62,6 +64,9 @@ Value Interpreter::visit(AST ast)
     {
         case P_STATEMENTLIST:   return visitStatementList(ast);
         case T_ASSIGN:          return visitAssign(ast);
+        case T_IF:              return visitIf(ast);
+        case T_BINCMP:
+        case T_BITCMP:          return visitCompare(ast);
         case T_OPR:             return visitOpr(ast);
         case T_INT:             return visitInt(ast);
         case T_FLOAT:           return visitFloat(ast);
@@ -92,6 +97,32 @@ Value Interpreter::visitAssign(AST ast)
     return Value(I_COMPLETE, "");
 }
 
+Value Interpreter::visitIf(AST ast)
+{
+    Value condition = visitCompare(*ast.left);
+    if (condition.value == "0")
+    {
+        if (ast.right->right != nullptr) return visit(*ast.right->right);
+        return Value(I_COMPLETE, "");
+    }
+    return visit(*ast.right->left);
+}
+
+Value Interpreter::visitCompare(AST ast)
+{
+    Value lhs = visit(*ast.left);
+    Value rhs = visit(*ast.right);
+
+    bool result = false;
+    if (ast.value == "==") result = lhs.value == rhs.value;
+    if (ast.value == ">=") result = lhs.value >= rhs.value;
+    if (ast.value == "<=") result = lhs.value <= rhs.value;
+    if (ast.value == "!=") result = lhs.value != rhs.value;
+    if (ast.value == ">") result = lhs.value > rhs.value;
+    if (ast.value == "<") result = lhs.value < rhs.value;
+
+    return Value(T_BOOL, to_string(result));
+}
 
 Value Interpreter::visitOpr(AST ast)
 {
