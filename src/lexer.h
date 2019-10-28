@@ -35,13 +35,15 @@
 #define T_RETURN 37
 #define T_THEN 38
 #define T_END 39
+#define T_IN 40
+#define T_TO 41
 
 // Separators
-#define T_LPAREN 40 // (
-#define T_RPAREN 41 // )
-#define T_LBRACKET 42 // [
-#define T_RBRACKET 43 // ]
-#define T_COMMA 44 // ,
+#define T_LPAREN 50 // (
+#define T_RPAREN 51 // )
+#define T_LBRACKET 52 // [
+#define T_RBRACKET 53 // ]
+#define T_COMMA 54 // ,
 
 #include <iostream>
 #include <deque>
@@ -461,6 +463,16 @@ void Lexer:: parseIdentifier()
         {
             currentTokenType = T_BOOL;
             currentTokenValue = "0";
+        }
+        else if (currentTokenValue == "in")
+        {
+            currentTokenType = T_IN;
+            currentTokenValue = "";
+        }
+        else if (currentTokenValue == "to")
+        {
+            currentTokenType = T_TO;
+            currentTokenValue = "";
         }
     }
 }
