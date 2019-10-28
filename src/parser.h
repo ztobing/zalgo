@@ -223,7 +223,7 @@ AST Parser::ifStatement()
         if (eat(T_IF))
         {
             AST newIfNode(T_IF, "");
-            newIfNode.left = new AST(expr());
+            newIfNode.left = new AST(compareStatement());
             if (!eat(T_THEN)) AST(P_NOMATCH, "");
             if (!eat(T_COMMANDNEND)) AST(P_NOMATCH, "");
             AST ifActionNode(P_IFACTIONS, "");
