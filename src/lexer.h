@@ -19,7 +19,7 @@
 #define T_CLASS 16
 
 // Operators
-#define T_OPR 20 // +, -, /, *,  >, <, ^
+#define T_OPR 20 // +, -, /, *,  >, <, ^, %
 #define T_ASSIGN 21 // =, !
 #define T_BINCMP 22 // ==, +=, -=, *=, /=, >=, <=, !=, ++, --
 #define T_BITCMP 23 // &&, ||
@@ -31,6 +31,7 @@
 #define T_WHILE 33
 #define T_DO 34
 #define T_PRINT 35
+#define T_INPUT 36
 #define T_RETURN 37
 #define T_THEN 38
 #define T_END 39
@@ -253,6 +254,7 @@ bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
             currentTokenValue = c;
             return true;
         }
+        case '%':
         case '^':
         case '*':
         case '/':
@@ -392,6 +394,11 @@ void Lexer:: parseIdentifier()
         else if (currentTokenValue == "print")
         {
             currentTokenType = T_PRINT;
+            currentTokenValue = "";
+        }
+        else if (currentTokenValue == "input")
+        {
+            currentTokenType = T_INPUT;
             currentTokenValue = "";
         }
         else if (currentTokenValue == "return")
