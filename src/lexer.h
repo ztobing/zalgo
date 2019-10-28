@@ -373,6 +373,7 @@ void Lexer:: parseIdentifier()
                 currentTokenValue = "";
                 return;
             }
+            if (!openedTags.empty()) if (openedTags.top() == "then") return;
             openedTags.push(currentTokenValue);
             currentTokenValue = "";
         }
