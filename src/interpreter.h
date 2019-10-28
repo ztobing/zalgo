@@ -361,7 +361,7 @@ Value Interpreter::visitOpr(AST ast)
         }
         if (lhs.type == T_FLOAT || rhs.type == T_FLOAT)
         {
-            int result = stod(lhs.value) - stod(rhs.value);
+            double result = stod(lhs.value) - stod(rhs.value);
             return Value(T_FLOAT, to_string(result));
         }
         return Value(I_NOMATCH, "");
@@ -390,7 +390,7 @@ Value Interpreter::visitOpr(AST ast)
         }
         if (lhs.type == T_FLOAT || rhs.type == T_FLOAT)
         {
-            int result = stod(lhs.value) * stod(rhs.value);
+            double result = stod(lhs.value) * stod(rhs.value);
             return Value(T_FLOAT, to_string(result));
         }
         return Value(I_NOMATCH, "");
@@ -410,7 +410,7 @@ Value Interpreter::visitOpr(AST ast)
         }
         if (lhs.type == T_FLOAT || rhs.type == T_FLOAT)
         {
-            int result = stod(lhs.value) / stod(rhs.value);
+            double result = stod(lhs.value) / stod(rhs.value);
             return Value(T_FLOAT, to_string(result));
         }
         return Value(I_NOMATCH, "");
@@ -430,7 +430,7 @@ Value Interpreter::visitOpr(AST ast)
         }
         if (lhs.type == T_FLOAT || rhs.type == T_FLOAT)
         {
-            int result = pow(stod(lhs.value), stod(rhs.value));
+            double result = pow(stod(lhs.value), stod(rhs.value));
             return Value(T_FLOAT, to_string(result));
         }
         return Value(I_NOMATCH, "");
