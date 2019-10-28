@@ -27,6 +27,7 @@ class Parser
         AST statement();
         AST assignStatement();
         AST compareStatement();
+        AST printStatement();
         AST expr();
         AST term();
         AST factor();
@@ -114,7 +115,7 @@ AST Parser::statementList()
 AST Parser::statement()
 {
     // statement
-    // block_statement | assignment_statement | compare_statement | call_statement | empty
+    // block_statement | assignment_statement | compare_statement | call_statement | print_statement empty
     cout << "statement START" << endl;
 
     AST statementNode(P_STATEMENT, "");
@@ -129,8 +130,12 @@ AST Parser::statement()
     // Call Statement
 
     // Compare Statement
-    // statementNode = compareStatement();
-    // if (statementNode.type != P_NOMATCH) return statementNode;
+    statementNode = compareStatement();
+    if (statementNode.type != P_NOMATCH) return statementNode;
+
+    // Print Statement
+    statementNode = printStatement();
+    if (statementNode.type != P_NOMATCH) return statementNode;
 
     // Empty Statement
 
@@ -198,6 +203,17 @@ AST Parser::compareStatement()
     compareAST.left = new AST(leftExpr);
     compareAST.right = new AST(rightExpr);
     return compareAST;
+}
+
+AST Parser::printStatement()
+{
+    // print_statement
+    // print expr
+
+    if (!eat(T_PRINT)) return AST(P_NOMATCH, "");
+    AST printNode(T_PRINT, "");
+    printNode.left = new AST(expr());
+    return printNode;
 }
 
 AST Parser::expr()
