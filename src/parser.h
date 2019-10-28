@@ -215,7 +215,6 @@ AST Parser::ifStatement()
     ifNode.left = new AST(compareNode);
     ifNode.right = new AST(P_IFACTIONS, "");
     ifNode.right->left = new AST(statementList());
-    cout << "ASD" << endl;
 
     while (currentToken.type == T_ELSE)
     {
@@ -256,7 +255,6 @@ AST Parser::ifStatement()
     }
     if (!eat(T_END)) return AST(P_NOMATCH, "");
     if (!eat(T_IF)) return AST(P_NOMATCH, "");
-    cout << "IF DONE" << endl;
     return ifNode;
 }
 
