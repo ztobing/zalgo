@@ -24,6 +24,7 @@ class Interpreter
         Value visitAssign(AST);
         Value visitOpr(AST);
         Value visitVar(AST);
+        Value visitFloat(AST);
     public:
         Interpreter(AST);
         void interpret();
@@ -51,7 +52,7 @@ Value Interpreter::visit(AST ast)
     // Value preorderVal = ast.left != NULL ? visit(*ast.left) : Value(I_NOMATCH, "");
 
     // Inorder tasks
-    cout << "Current: " << ast.value << endl;
+    cout << "Current: " << ast.value << " " << ast.type << endl;
 
     switch (ast.type)
     {
@@ -61,6 +62,8 @@ Value Interpreter::visit(AST ast)
             return visitAssign(ast);
         case T_OPR:
             return visitOpr(ast);
+        case T_FLOAT:
+            return visitFloat(ast);
         default:
             break;
     }
@@ -93,6 +96,10 @@ Value Interpreter::visitOpr(AST ast)
     {
         return Value(ast.type, ast.value);
     }
+    else if (ast.type == T_VAR)
+    {
+        return visitVar(ast);
+    }
 
     // --- UNARY --- //
     if ((ast.value == "-" || ast.value == "+") && ast.right == NULL)
@@ -118,12 +125,12 @@ Value Interpreter::visitOpr(AST ast)
         // Integer
         if (leftHand.type == T_INT && rightHand.type == T_INT)
         {
-            return Value(T_INT, to_string(stoi(leftHand.value) + stoi(rightHand.value)));
+            return Value(T_INT, to_string(stoi(visitOpr(*ast.left).value) + stoi(visitOpr(*ast.right).value)));
         }
         // Float
         if (leftHand.type == T_FLOAT || rightHand.type == T_FLOAT)
         {
-            return Value(T_FLOAT, to_string(stod(leftHand.value) + stod(rightHand.value)));
+            return Value(T_FLOAT, to_string(stod(visitOpr(*ast.left).value) + stod(visitOpr(*ast.right).value)));
         }
         // String
         if (leftHand.type == T_STR || rightHand.type == T_STR)
@@ -233,6 +240,13 @@ Value Interpreter::visitVar(AST ast)
     if (GLOBAL_SCOPE.find(ast.value) == GLOBAL_SCOPE.end())
     ; // Throw exception
     return GLOBAL_SCOPE[ast.value];
+}
+
+Value Interpreter::visitFloat(AST ast)
+{
+    if (ast.type != T_FLOAT)
+    ; // Throw exception
+    return Value(ast.type, ast.value);
 }
 
 #endif
