@@ -26,10 +26,11 @@
 
 // Keywords
 #define T_IF 30
-#define T_FOR 31
-#define T_WHILE 32
-#define T_DO 33
-#define T_PRINT 34
+#define T_ELSE 31
+#define T_FOR 32
+#define T_WHILE 33
+#define T_DO 34
+#define T_PRINT 35
 #define T_RETURN 37
 #define T_THEN 38
 #define T_END 39
@@ -94,6 +95,7 @@ Lexer::Lexer()
 
 void Lexer::add(char c, string currentLineContent, int line, int col)
 {
+    if (parseEOF(c, currentLineContent, line, col)) return;
     this->currentLineContent = currentLineContent;
     currentLine = line;
     currentCol = col;
@@ -105,15 +107,13 @@ void Lexer::add(char c, string currentLineContent, int line, int col)
     // cout << "        " << currentTokenValue << endl;
 
     // Process input according to the lexer order of precedence
-    if (parseEOF(c, currentLineContent, line, col)) return;
     if (parseString(c, currentLineContent, line, col)) return;
     if (parseComment(c, currentLineContent, line, col)) return;
     if (parseSymbol(c, currentLineContent, line, col)) return;
     if (parseNumber(c, currentLineContent, line, col)) return;
     if (parseSpace(c, currentLineContent, line, col)) return;
     if (parseIdentifier(c, currentLineContent, line, col)) return;
-
-    SyntaxError(currentTokenLine, currentCol, currentLineContent, &"Invalid character: " [c]);
+    SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid character: '" + string(1, c) + "'");
 }
 
 bool Lexer::parseString(char c, string currentLineContent, int line, int col)
@@ -126,7 +126,7 @@ bool Lexer::parseString(char c, string currentLineContent, int line, int col)
             currentTokenType = T_STR;
             return true;
         }
-        SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid escape symbol");
+        SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid escape symbol.");
     }
     if (currentTokenType == T_STR && string(1, c) != openedTags.top())
     {
@@ -200,19 +200,16 @@ bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
             currentTokenValue = "";
             return popSeparator("[");
         }
+        case ',':
+        {
+            pushCurrentToken();
+            currentTokenType = T_COMMA;
+            currentTokenValue = "";
+            return true;
+        }
         case '=':
         {
-            if (currentTokenType == T_OPR || currentTokenType == T_ASSIGN)
-            {
-                if (currentTokenValue == "=")
-                {
-                    currentTokenType = T_BINCMP;
-                    currentTokenValue += "=";
-                    return true;
-                }
-                SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid operator: " + currentTokenValue + c);
-            }
-            else if (currentTokenType == T_BINCMP || currentTokenType == T_ASSIGN)
+            if (currentTokenType == T_OPR || currentTokenType == T_ASSIGN || currentTokenType == T_BINCMP)
             {
                 if (currentTokenValue.length() >= 2)
                 {
@@ -223,16 +220,18 @@ bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
                     case '<':
                     case '>':
                     case '!':
+                    case '=':
                     {
-                        currentTokenValue += c;
+                        currentTokenType = T_BINCMP;
+                        currentTokenValue += "=";
                         return true;
                     }
                     default:
                     {
                         SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid operator: " + currentTokenValue + c);
                     }
-                    return true;
                 }
+                SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid operator: " + currentTokenValue + c);
             }
             pushCurrentToken();
             currentTokenType = T_ASSIGN;
@@ -249,13 +248,9 @@ bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
         }
         case '!':
         {
-            if (currentTokenType == T_BINCMP)
-            {
-                // return error 
-            }
             pushCurrentToken();
             currentTokenType = T_ASSIGN;
-            currentTokenValue = "!";
+            currentTokenValue = c;
             return true;
         }
         case '^':
@@ -265,8 +260,8 @@ bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
         case '-':
         {
             pushCurrentToken();
-            currentTokenValue = c;
             currentTokenType = T_OPR;
+            currentTokenValue = c;
             return true;
         }
         case '&':
@@ -315,8 +310,7 @@ bool Lexer::parseNumber(char c, string currentLineContent, int line, int col)
     // Handle float
     if (currentTokenType == T_FLOAT && c == '.')
     {
-        // TODO: add exception
-        Exception(line, col, currentLineContent, "asd", "asd test");
+        SyntaxError(currentTokenLine, currentCol, currentLineContent, "Only one dot is allowed: " + currentTokenValue + c);
         return true;
     }
     
@@ -346,28 +340,22 @@ bool Lexer::parseIdentifier(char c, string currentLineContent, int line, int col
     // Handle identifiers
     if (currentTokenType == T_VAR)
     {
-        // todo: add identifier validation
         if (isAlpha(c) || c == '_' || isNumber(c)) currentTokenValue += c;
-        else SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid syntax: " + currentTokenValue + c);
+        else SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid variable name: " + currentTokenValue + c);
         return true;
     }
 
     if (currentTokenType != T_VAR)
     {
-        if (currentTokenType == T_INT || currentTokenType == T_FLOAT) SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid syntax: " + currentTokenValue + c);
+        if (currentTokenType == T_INT || currentTokenType == T_FLOAT) SyntaxError(currentTokenLine, currentCol, currentLineContent, "Variable name can't begin with a number.");
 
-        pushCurrentToken();
         if (isAlpha(c) || c == '_')
         {
+            pushCurrentToken();
             currentTokenType = T_VAR;
             currentTokenValue = c;
+            return true;
         }
-        else
-        {
-            // TODO: Add parse error exception
-        }
-        
-        return true;
     }
     return false;
 }
@@ -380,6 +368,12 @@ void Lexer:: parseIdentifier()
         {
             currentTokenType = T_IF;
             if (!openedTags.empty()) if (openedTags.top() == currentTokenValue) openedTags.pop();
+            openedTags.push(currentTokenValue);
+            currentTokenValue = "";
+        }
+        else if (currentTokenValue == "else")
+        {
+            currentTokenType = T_ELSE;
             openedTags.push(currentTokenValue);
             currentTokenValue = "";
         }
@@ -400,6 +394,13 @@ void Lexer:: parseIdentifier()
         else if (currentTokenValue == "do")
         {
             currentTokenType = T_DO;
+            openedTags.push(currentTokenValue);
+            currentTokenValue = "";
+        }
+        else if (currentTokenValue == "func" || currentTokenValue == "function")
+        {
+            currentTokenType = T_FUNC;
+            if (!openedTags.empty()) if (openedTags.top() == currentTokenValue) openedTags.pop();
             openedTags.push(currentTokenValue);
             currentTokenValue = "";
         }
@@ -429,18 +430,18 @@ void Lexer:: parseIdentifier()
                     }
                 }
             }
-            SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid operator: " + currentTokenValue);
+            SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid syntax: " + currentTokenValue);
         }
         else if (currentTokenValue == "end")
         {
             currentTokenType = T_END;
-            currentTokenValue = "";
             if (!openedTags.empty()) if (openedTags.top() == "then")
             {
                 openedTags.pop();
+                currentTokenValue = "";
                 return;
             }
-            SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid operator: " + currentTokenValue);
+            SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid syntax: " + currentTokenValue);
         }
         else if (currentTokenValue == "func" || currentTokenValue == "function")
         {
@@ -488,12 +489,33 @@ bool Lexer::parseEOF(char c, string currentLineContent, int line, int col)
     {
         if (!openedTags.empty())
         {
-            // TODO: add exception
-            Exception(line, col, currentLineContent, "asd", "asd test");
+            string s;
+            if (openedTags.top() == "(")
+            {
+                s = ")";
+            }
+            else if (openedTags.top() == "[")
+            {
+                s = "]";
+            }
+            else if (openedTags.top() == "then")
+            {
+                s = "end";
+            }
+            else if (openedTags.top() == "end")
+            {
+                openedTags.pop();
+                openedTags.pop();
+                s = openedTags.top();
+            }
+            else
+            {
+                s = "then";
+            }
+            SyntaxError(tokens.back().line, tokens.back().col, tokens.back().lineContent, "Expected: " + s);
         }
-        
         pushCurrentToken();
-        tokens.push_back(Token(currentTokenLine, currentTokenCol, T_EOF, ""));
+        tokens.push_back(Token(currentTokenLine, currentTokenCol, currentLineContent, T_EOF, ""));
         return true;
     }
     return false;
@@ -501,7 +523,7 @@ bool Lexer::parseEOF(char c, string currentLineContent, int line, int col)
 
 Token Lexer::next()
 {
-    if (tokens.empty()) return Token(currentTokenLine, currentTokenCol, T_EOF, "");
+    if (tokens.empty()) return Token(currentTokenLine, currentTokenCol, currentLineContent, T_EOF, "");
     
     Token token = tokens.front();
     tokens.pop_front();
@@ -510,18 +532,18 @@ Token Lexer::next()
 
 Token Lexer::front()
 {
-    if (tokens.empty()) return Token(currentTokenLine, currentTokenCol, T_EOF, "");
+    if (tokens.empty()) return Token(currentTokenLine, currentTokenCol, currentLineContent, T_EOF, "");
     return tokens.front();
 }
 
 void Lexer::pushEOL()
 {
-    if (currentTokenType == T_STR) SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid syntax");
+    if (currentTokenType == T_STR) SyntaxError(currentTokenLine, currentCol, currentLineContent, "\" is missing!");
 
     if (currentTokenType != T_NONE)
         parseIdentifier();
         pushCurrentToken();
-    if (tokens.size() != currentTokenCount) tokens.push_back(Token(currentTokenLine, currentTokenCol, T_COMMANDNEND, ""));
+    if (tokens.size() != currentTokenCount) tokens.push_back(Token(currentTokenLine, currentTokenCol, currentLineContent, T_COMMANDNEND, ""));
     currentTokenCount = tokens.size();
 }
 
@@ -540,7 +562,7 @@ bool Lexer::eof()
 void Lexer::pushCurrentToken()
 {
     if (currentTokenType != T_NONE)
-        tokens.push_back(Token(currentTokenLine, currentTokenCol, currentTokenType, currentTokenValue));
+        tokens.push_back(Token(currentTokenLine, currentTokenCol, currentLineContent, currentTokenType, currentTokenValue));
     currentTokenType = T_NONE;
     currentTokenValue = "";
     setTokenPosition();
@@ -554,7 +576,7 @@ bool Lexer::popSeparator(string c)
         openedTags.pop();
         return true;
     }
-    SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid operator: " + currentTokenValue + c);
+    SyntaxError(currentTokenLine, currentCol, currentLineContent, "Error does not match: " + currentTokenValue + c);
     return false;
 }
 

@@ -8,23 +8,24 @@ using namespace std;
 struct Token
 {
     int type;
-    string value;
+    string value, lineContent;
     int line, col;
     Token();
-    Token(int line, int col, int type, string value);
+    Token(int line, int col, string, int type, string value);
 };
 
 Token::Token()
 {
     type = 0;
     line = col = -1;
-    value = "";
+    value = lineContent = "";
 }
 
-Token::Token(int line, int col, int type, string value)
+Token::Token(int line, int col, string lineContent, int type, string value)
 {
     this->line = line;
     this->col = col;
+    this->lineContent = lineContent;
     this->type = type;
     this->value = value;
 }
