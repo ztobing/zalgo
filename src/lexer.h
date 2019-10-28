@@ -367,14 +367,6 @@ void Lexer:: parseIdentifier()
         if (currentTokenValue == "if")
         {
             currentTokenType = T_IF;
-            if (!openedTags.empty()) if (openedTags.top() == currentTokenValue)
-            {
-                openedTags.pop();
-                currentTokenValue = "";
-                return;
-            }
-            if (!openedTags.empty()) if (openedTags.top() == "then") return;
-            openedTags.push(currentTokenValue);
             currentTokenValue = "";
         }
         else if (currentTokenValue == "else")
@@ -385,45 +377,18 @@ void Lexer:: parseIdentifier()
         else if (currentTokenValue == "for")
         {
             currentTokenType = T_FOR;
-            if (!openedTags.empty()) if (openedTags.top() == currentTokenValue)
-            {
-                openedTags.pop();
-                currentTokenValue = "";
-                return;
-            }
-            openedTags.push(currentTokenValue);
             currentTokenValue = "";
         }
         else if (currentTokenValue == "while")
         {
             currentTokenType = T_WHILE;
-            if (!openedTags.empty()) if (openedTags.top() == "do" || openedTags.top() == currentTokenValue)
-            {
-                openedTags.pop();
-                currentTokenValue = "";
-                return;
-            }
-            openedTags.push(currentTokenValue);
             currentTokenValue = "";
         }
-        else if (currentTokenValue == "do")
-        {
-            currentTokenType = T_DO;
-            openedTags.push(currentTokenValue);
-            currentTokenValue = "";
-        }
-        else if (currentTokenValue == "func" || currentTokenValue == "function")
-        {
-            currentTokenType = T_FUNC;
-            if (!openedTags.empty()) if (openedTags.top() == currentTokenValue)
-            {
-                openedTags.pop();
-                currentTokenValue = "";
-                return;
-            }
-            openedTags.push(currentTokenValue);
-            currentTokenValue = "";
-        }
+        // else if (currentTokenValue == "do")
+        // {
+        //     currentTokenType = T_DO;
+        //     currentTokenValue = "";
+        // }
         else if (currentTokenValue == "print")
         {
             currentTokenType = T_PRINT;
@@ -437,31 +402,12 @@ void Lexer:: parseIdentifier()
         else if (currentTokenValue == "then")
         {
             currentTokenType = T_THEN;
-            if (!openedTags.empty())
-            {
-                string keywords[] {"if", "for", "while", "do"};
-                for (string s: keywords)
-                {
-                    if (openedTags.top() == s)
-                    {
-                        openedTags.push(currentTokenValue);
-                        currentTokenValue = "";
-                        return;
-                    }
-                }
-            }
-            SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid syntax: " + currentTokenValue);
+            currentTokenValue = "";
         }
         else if (currentTokenValue == "end")
         {
             currentTokenType = T_END;
-            if (!openedTags.empty()) if (openedTags.top() == "then")
-            {
-                openedTags.pop();
-                currentTokenValue = "";
-                return;
-            }
-            SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid syntax: " + currentTokenValue);
+            currentTokenValue = "";
         }
         else if (currentTokenValue == "func" || currentTokenValue == "function")
         {
