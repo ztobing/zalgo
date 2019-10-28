@@ -133,8 +133,8 @@ AST Parser::statement()
     // if (statementNode.type != P_NOMATCH) return statementNode;
 
     // While Statement
-    // statementNode = whileStatement();
-    // if (statementNode.type != P_NOMATCH) return statementNode;
+    statementNode = whileStatement();
+    if (statementNode.type != P_NOMATCH) return statementNode;
 
     // Assignment Statement
     statementNode = assignStatement();
@@ -215,7 +215,6 @@ AST Parser::ifStatement()
     ifNode.left = new AST(compareNode);
     ifNode.right = new AST(P_IFACTIONS, "");
     ifNode.right->left = new AST(statementList());
-    cout << "ASD" << endl;
 
     while (currentToken.type == T_ELSE)
     {
@@ -223,7 +222,7 @@ AST Parser::ifStatement()
         if (eat(T_IF))
         {
             AST newIfNode(T_IF, "");
-            newIfNode.left = new AST(expr());
+            newIfNode.left = new AST(compareStatement());
             if (!eat(T_THEN)) AST(P_NOMATCH, "");
             if (!eat(T_COMMANDNEND)) AST(P_NOMATCH, "");
             AST ifActionNode(P_IFACTIONS, "");
@@ -256,7 +255,6 @@ AST Parser::ifStatement()
     }
     if (!eat(T_END)) return AST(P_NOMATCH, "");
     if (!eat(T_IF)) return AST(P_NOMATCH, "");
-    cout << "IF DONE" << endl;
     return ifNode;
 }
 
@@ -267,7 +265,14 @@ AST Parser::forStatement()
 
 AST Parser::whileStatement()
 {
-    
+    if (!eat(T_WHILE)) return AST(P_NOMATCH, "");
+    AST whileNode(T_WHILE, "");
+    whileNode.left = new AST(compareStatement());
+    if (!eat(T_THEN)) return AST(P_NOMATCH, "");
+    whileNode.right = new AST(statementList());
+    if (!eat(T_END)) return AST(P_NOMATCH, "");
+    if (!eat(T_WHILE)) return AST(P_NOMATCH, "");
+    return whileNode;
 }
 
 AST Parser::compareStatement()

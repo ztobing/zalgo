@@ -23,6 +23,9 @@ class Interpreter
         Value visit(AST);
         Value visitStatementList(AST);
         Value visitAssign(AST);
+        Value visitIf(AST);
+        Value visitWhile(AST);
+        Value visitCompare(AST);
         Value visitOpr(AST);
         Value visitVar(AST);
         Value visitInt(AST);
@@ -51,17 +54,14 @@ void Interpreter::interpret()
 
 Value Interpreter::visit(AST ast)
 {
-    // Preorder tasks
-    // if (ast.left != NULL) visit(*ast.left);
-    // Value preorderVal = ast.left != NULL ? visit(*ast.left) : Value(I_NOMATCH, "");
-
-    // Inorder tasks
-    // cout << "Current: " << ast.value << " " << ast.type << endl;
-
     switch (ast.type)
     {
         case P_STATEMENTLIST:   return visitStatementList(ast);
         case T_ASSIGN:          return visitAssign(ast);
+        case T_IF:              return visitIf(ast);
+        case T_WHILE:           return visitWhile(ast);
+        case T_BINCMP:
+        case T_BITCMP:          return visitCompare(ast);
         case T_OPR:             return visitOpr(ast);
         case T_INT:             return visitInt(ast);
         case T_FLOAT:           return visitFloat(ast);
@@ -71,8 +71,6 @@ Value Interpreter::visit(AST ast)
         default:                break;
     }
 
-    // Postorder tasks
-    // if (ast.right != NULL) visit(*ast.right);
     return Value(P_NOMATCH, "");
 }
 
@@ -92,6 +90,228 @@ Value Interpreter::visitAssign(AST ast)
     return Value(I_COMPLETE, "");
 }
 
+Value Interpreter::visitIf(AST ast)
+{
+    Value condition = visitCompare(*ast.left);
+    if (condition.value == "0")
+    {
+        if (ast.right->right != nullptr) return visit(*ast.right->right);
+        return Value(I_COMPLETE, "");
+    }
+    return visit(*ast.right->left);
+}
+
+Value Interpreter::visitWhile(AST ast)
+{
+    AST origCompare(*ast.left);
+    AST origOperation(*ast.right);
+
+    Value condition = visitCompare(AST(origCompare));
+    bool cond = condition.value == "0" ? false : true;
+    
+    while(cond)
+    {
+        visit(AST(origOperation));
+        condition = visitCompare(AST(origCompare));
+        cond = condition.value == "0" ? false : true;
+    }
+    return Value(I_COMPLETE, "");
+}
+
+Value Interpreter::visitCompare(AST ast)
+{
+    Value lhs = visit(*ast.left);
+    Value rhs = visit(*ast.right);
+
+    bool result = false;
+
+    if (ast.value == "==") 
+    {
+        switch(lhs.type)
+        {
+            case T_BOOL:
+            case T_INT:
+            case T_FLOAT:
+            {
+                double lhsValue = stod(lhs.value);
+                double rhsValue;
+                switch (rhs.type)
+                {
+                    case T_INT: rhsValue = stoi(rhs.value); break;
+                    case T_FLOAT: rhsValue = stod(rhs.value); break;
+                    case T_BOOL: rhsValue = stoi(rhs.value); break;
+                    default: break; // THROW ERROR
+                }
+                result = lhsValue == rhsValue;
+                break;
+            }
+            case T_STR:
+            {
+                string lhsValue = lhs.value;
+                string rhsValue;
+                switch (rhs.type)
+                {
+                    case T_STR: rhsValue = rhs.value; break;
+                    default: break; // THROW ERROR
+                }
+                result = lhsValue == rhsValue;
+                break;
+            }
+        }
+    }
+    else if (ast.value == "!=") 
+    {
+        switch(lhs.type)
+        {
+            case T_BOOL:
+            case T_INT:
+            case T_FLOAT:
+            {
+                double lhsValue = stod(lhs.value);
+                double rhsValue;
+                switch (rhs.type)
+                {
+                    case T_INT: rhsValue = stoi(rhs.value); break;
+                    case T_FLOAT: rhsValue = stod(rhs.value); break;
+                    case T_BOOL: rhsValue = stoi(rhs.value); break;
+                    default: break; // THROW ERROR
+                }
+                result = lhsValue != rhsValue;
+                break;
+            }
+            case T_STR:
+            {
+                string lhsValue = lhs.value;
+                string rhsValue;
+                switch (rhs.type)
+                {
+                    case T_STR: rhsValue = rhs.value; break;
+                    default: break; // THROW ERROR
+                }
+                result = lhsValue != rhsValue;
+                break;
+            }
+        }
+    }
+    else if (ast.value == "<=") 
+    {
+        switch(lhs.type)
+        {
+            case T_BOOL:
+            case T_INT:
+            case T_FLOAT:
+            {
+                double lhsValue = stod(lhs.value);
+                double rhsValue;
+                switch (rhs.type)
+                {
+                    case T_INT: rhsValue = stoi(rhs.value); break;
+                    case T_FLOAT: rhsValue = stod(rhs.value); break;
+                    case T_BOOL: rhsValue = stoi(rhs.value); break;
+                    default: break; // THROW ERROR
+                }
+                result = lhsValue <= rhsValue;
+                break;
+            }
+            case T_STR:
+            {
+                // THROW ERROR
+                break;
+            }
+        }
+    }
+    else if (ast.value == ">=") 
+    {
+        switch(lhs.type)
+        {
+            case T_BOOL:
+            case T_INT:
+            case T_FLOAT:
+            {
+                double lhsValue = stod(lhs.value);
+                double rhsValue;
+                switch (rhs.type)
+                {
+                    case T_INT: rhsValue = stoi(rhs.value); break;
+                    case T_FLOAT: rhsValue = stod(rhs.value); break;
+                    case T_BOOL: rhsValue = stoi(rhs.value); break;
+                    default: break; // THROW ERROR
+                }
+                result = lhsValue >= rhsValue;
+                break;
+            }
+            case T_STR:
+            {
+                // THROW ERROR
+                break;
+            }
+        }
+    }
+        else if (ast.value == "<") 
+    {
+        switch(lhs.type)
+        {
+            case T_BOOL:
+            case T_INT:
+            case T_FLOAT:
+            {
+                double lhsValue = stod(lhs.value);
+                double rhsValue;
+                switch (rhs.type)
+                {
+                    case T_INT: rhsValue = stoi(rhs.value); break;
+                    case T_FLOAT: rhsValue = stod(rhs.value); break;
+                    case T_BOOL: rhsValue = stoi(rhs.value); break;
+                    default: break; // THROW ERROR
+                }
+                result = lhsValue < rhsValue;
+                break;
+            }
+            case T_STR:
+            {
+                // THROW ERROR
+                break;
+            }
+        }
+    }
+    else if (ast.value == ">") 
+    {
+        switch(lhs.type)
+        {
+            case T_BOOL:
+            case T_INT:
+            case T_FLOAT:
+            {
+                double lhsValue = stod(lhs.value);
+                double rhsValue;
+                switch (rhs.type)
+                {
+                    case T_INT: rhsValue = stoi(rhs.value); break;
+                    case T_FLOAT: rhsValue = stod(rhs.value); break;
+                    case T_BOOL: rhsValue = stoi(rhs.value); break;
+                    default: break; // THROW ERROR
+                }
+                result = lhsValue > rhsValue;
+                break;
+            }
+            case T_STR:
+            {
+                // THROW ERROR
+                break;
+            }
+        }
+    }
+
+    // String
+    // if (ast.value == "==") result = lhs.value == rhs.value;
+    // if (ast.value == ">=") result = lhs.value >= rhs.value;
+    // if (ast.value == "<=") result = lhs.value <= rhs.value;
+    // if (ast.value == "!=") result = lhs.value != rhs.value;
+    // if (ast.value == ">") result = lhs.value > rhs.value;
+    // if (ast.value == "<") result = lhs.value < rhs.value;
+
+    return Value(T_BOOL, to_string(result));
+}
 
 Value Interpreter::visitOpr(AST ast)
 {
@@ -141,7 +361,7 @@ Value Interpreter::visitOpr(AST ast)
         }
         if (lhs.type == T_FLOAT || rhs.type == T_FLOAT)
         {
-            int result = stod(lhs.value) - stod(rhs.value);
+            double result = stod(lhs.value) - stod(rhs.value);
             return Value(T_FLOAT, to_string(result));
         }
         return Value(I_NOMATCH, "");
@@ -170,7 +390,7 @@ Value Interpreter::visitOpr(AST ast)
         }
         if (lhs.type == T_FLOAT || rhs.type == T_FLOAT)
         {
-            int result = stod(lhs.value) * stod(rhs.value);
+            double result = stod(lhs.value) * stod(rhs.value);
             return Value(T_FLOAT, to_string(result));
         }
         return Value(I_NOMATCH, "");
@@ -190,7 +410,7 @@ Value Interpreter::visitOpr(AST ast)
         }
         if (lhs.type == T_FLOAT || rhs.type == T_FLOAT)
         {
-            int result = stod(lhs.value) / stod(rhs.value);
+            double result = stod(lhs.value) / stod(rhs.value);
             return Value(T_FLOAT, to_string(result));
         }
         return Value(I_NOMATCH, "");
@@ -210,7 +430,7 @@ Value Interpreter::visitOpr(AST ast)
         }
         if (lhs.type == T_FLOAT || rhs.type == T_FLOAT)
         {
-            int result = pow(stod(lhs.value), stod(rhs.value));
+            double result = pow(stod(lhs.value), stod(rhs.value));
             return Value(T_FLOAT, to_string(result));
         }
         return Value(I_NOMATCH, "");
