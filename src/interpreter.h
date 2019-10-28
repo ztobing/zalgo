@@ -125,17 +125,190 @@ Value Interpreter::visitCompare(AST ast)
 
     bool result = false;
 
-    // Int/float
-    if (lhs.type == T_INT)
-        if (ast.value == "!=") result = stoi(lhs.value) != stoi(rhs.value);
+    if (ast.value == "==") 
+    {
+        switch(lhs.type)
+        {
+            case T_BOOL:
+            case T_INT:
+            case T_FLOAT:
+            {
+                double lhsValue = stod(lhs.value);
+                double rhsValue;
+                switch (rhs.type)
+                {
+                    case T_INT: rhsValue = stoi(rhs.value); break;
+                    case T_FLOAT: rhsValue = stod(rhs.value); break;
+                    case T_BOOL: rhsValue = stoi(rhs.value); break;
+                    default: break; // THROW ERROR
+                }
+                result = lhsValue == rhsValue;
+                break;
+            }
+            case T_STR:
+            {
+                string lhsValue = lhs.value;
+                string rhsValue;
+                switch (rhs.type)
+                {
+                    case T_STR: rhsValue = rhs.value; break;
+                    default: break; // THROW ERROR
+                }
+                result = lhsValue == rhsValue;
+                break;
+            }
+        }
+    }
+    else if (ast.value == "!=") 
+    {
+        switch(lhs.type)
+        {
+            case T_BOOL:
+            case T_INT:
+            case T_FLOAT:
+            {
+                double lhsValue = stod(lhs.value);
+                double rhsValue;
+                switch (rhs.type)
+                {
+                    case T_INT: rhsValue = stoi(rhs.value); break;
+                    case T_FLOAT: rhsValue = stod(rhs.value); break;
+                    case T_BOOL: rhsValue = stoi(rhs.value); break;
+                    default: break; // THROW ERROR
+                }
+                result = lhsValue != rhsValue;
+                break;
+            }
+            case T_STR:
+            {
+                string lhsValue = lhs.value;
+                string rhsValue;
+                switch (rhs.type)
+                {
+                    case T_STR: rhsValue = rhs.value; break;
+                    default: break; // THROW ERROR
+                }
+                result = lhsValue != rhsValue;
+                break;
+            }
+        }
+    }
+    else if (ast.value == "<=") 
+    {
+        switch(lhs.type)
+        {
+            case T_BOOL:
+            case T_INT:
+            case T_FLOAT:
+            {
+                double lhsValue = stod(lhs.value);
+                double rhsValue;
+                switch (rhs.type)
+                {
+                    case T_INT: rhsValue = stoi(rhs.value); break;
+                    case T_FLOAT: rhsValue = stod(rhs.value); break;
+                    case T_BOOL: rhsValue = stoi(rhs.value); break;
+                    default: break; // THROW ERROR
+                }
+                result = lhsValue <= rhsValue;
+                break;
+            }
+            case T_STR:
+            {
+                // THROW ERROR
+                break;
+            }
+        }
+    }
+    else if (ast.value == ">=") 
+    {
+        switch(lhs.type)
+        {
+            case T_BOOL:
+            case T_INT:
+            case T_FLOAT:
+            {
+                double lhsValue = stod(lhs.value);
+                double rhsValue;
+                switch (rhs.type)
+                {
+                    case T_INT: rhsValue = stoi(rhs.value); break;
+                    case T_FLOAT: rhsValue = stod(rhs.value); break;
+                    case T_BOOL: rhsValue = stoi(rhs.value); break;
+                    default: break; // THROW ERROR
+                }
+                result = lhsValue >= rhsValue;
+                break;
+            }
+            case T_STR:
+            {
+                // THROW ERROR
+                break;
+            }
+        }
+    }
+        else if (ast.value == "<") 
+    {
+        switch(lhs.type)
+        {
+            case T_BOOL:
+            case T_INT:
+            case T_FLOAT:
+            {
+                double lhsValue = stod(lhs.value);
+                double rhsValue;
+                switch (rhs.type)
+                {
+                    case T_INT: rhsValue = stoi(rhs.value); break;
+                    case T_FLOAT: rhsValue = stod(rhs.value); break;
+                    case T_BOOL: rhsValue = stoi(rhs.value); break;
+                    default: break; // THROW ERROR
+                }
+                result = lhsValue < rhsValue;
+                break;
+            }
+            case T_STR:
+            {
+                // THROW ERROR
+                break;
+            }
+        }
+    }
+    else if (ast.value == ">") 
+    {
+        switch(lhs.type)
+        {
+            case T_BOOL:
+            case T_INT:
+            case T_FLOAT:
+            {
+                double lhsValue = stod(lhs.value);
+                double rhsValue;
+                switch (rhs.type)
+                {
+                    case T_INT: rhsValue = stoi(rhs.value); break;
+                    case T_FLOAT: rhsValue = stod(rhs.value); break;
+                    case T_BOOL: rhsValue = stoi(rhs.value); break;
+                    default: break; // THROW ERROR
+                }
+                result = lhsValue > rhsValue;
+                break;
+            }
+            case T_STR:
+            {
+                // THROW ERROR
+                break;
+            }
+        }
+    }
 
     // String
-    if (ast.value == "==") result = lhs.value == rhs.value;
-    if (ast.value == ">=") result = lhs.value >= rhs.value;
-    if (ast.value == "<=") result = lhs.value <= rhs.value;
-    if (ast.value == "!=") result = lhs.value != rhs.value;
-    if (ast.value == ">") result = lhs.value > rhs.value;
-    if (ast.value == "<") result = lhs.value < rhs.value;
+    // if (ast.value == "==") result = lhs.value == rhs.value;
+    // if (ast.value == ">=") result = lhs.value >= rhs.value;
+    // if (ast.value == "<=") result = lhs.value <= rhs.value;
+    // if (ast.value == "!=") result = lhs.value != rhs.value;
+    // if (ast.value == ">") result = lhs.value > rhs.value;
+    // if (ast.value == "<") result = lhs.value < rhs.value;
 
     return Value(T_BOOL, to_string(result));
 }
