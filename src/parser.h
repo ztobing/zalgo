@@ -282,8 +282,7 @@ AST Parser::compareStatement()
 
     AST leftExpr = expr();
     Token compareToken = currentToken;
-    if (!(eat(T_BINCMP) || eat(T_BITCMP))) return AST(P_NOMATCH, "")
-    ; // Throw exception
+    if (!(eat(T_BINCMP) || eat(T_BITCMP))) return AST(P_NOMATCH, "");
     AST rightExpr = expr();
     AST compareAST(compareToken.type, compareToken.value);
     compareAST.left = new AST(leftExpr);
