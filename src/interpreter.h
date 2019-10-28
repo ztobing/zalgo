@@ -28,6 +28,7 @@ class Interpreter
         Value visitInt(AST);
         Value visitFloat(AST);
         Value visitString(AST);
+        Value visitPrint(AST);
     public:
         Interpreter(AST);
         void interpret();
@@ -55,7 +56,7 @@ Value Interpreter::visit(AST ast)
     // Value preorderVal = ast.left != NULL ? visit(*ast.left) : Value(I_NOMATCH, "");
 
     // Inorder tasks
-    cout << "Current: " << ast.value << " " << ast.type << endl;
+    // cout << "Current: " << ast.value << " " << ast.type << endl;
 
     switch (ast.type)
     {
@@ -66,6 +67,7 @@ Value Interpreter::visit(AST ast)
         case T_FLOAT:           return visitFloat(ast);
         case T_VAR:             return visitVar(ast);
         case T_STR:             return visitString(ast);
+        case T_PRINT:           return visitPrint(ast);
         default:                break;
     }
 
@@ -250,6 +252,14 @@ Value Interpreter::visitString(AST ast)
     ; // Throw exception
 
     return Value(T_STR, ast.value);
+}
+
+Value Interpreter::visitPrint(AST ast)
+{
+    if (ast.type != T_PRINT)
+    ; // Throw exception
+    cout << visit(*ast.left).value << endl;
+    return Value(I_COMPLETE, "");
 }
 
 #endif
