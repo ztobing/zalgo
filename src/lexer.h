@@ -379,7 +379,6 @@ void Lexer:: parseIdentifier()
         else if (currentTokenValue == "else")
         {
             currentTokenType = T_ELSE;
-            openedTags.push(currentTokenValue);
             currentTokenValue = "";
         }
         else if (currentTokenValue == "for")
@@ -498,6 +497,16 @@ void Lexer:: parseIdentifier()
         {
             currentTokenType = T_ASSIGN;
             currentTokenValue = "!";
+        }
+        else if (currentTokenValue == "true")
+        {
+            currentTokenType = T_BOOL;
+            currentTokenValue = "1";
+        }
+        else if (currentTokenValue == "false")
+        {
+            currentTokenType = T_BOOL;
+            currentTokenValue = "0";
         }
     }
 }
