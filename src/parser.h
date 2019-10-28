@@ -129,12 +129,12 @@ AST Parser::statement()
 
     // Call Statement
 
-    // Compare Statement
-    statementNode = compareStatement();
-    if (statementNode.type != P_NOMATCH) return statementNode;
-
     // Print Statement
     statementNode = printStatement();
+    if (statementNode.type != P_NOMATCH) return statementNode;
+    
+    // Compare Statement
+    statementNode = compareStatement();
     if (statementNode.type != P_NOMATCH) return statementNode;
 
     // Empty Statement
