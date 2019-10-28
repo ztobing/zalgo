@@ -16,9 +16,10 @@
 #define T_STR 13
 #define T_VAR 14
 #define T_FUNC 15
+#define T_CLASS 16
 
 // Operators
-#define T_OPR 20 // +, -, /, *,  >, <
+#define T_OPR 20 // +, -, /, *,  >, <, ^
 #define T_ASSIGN 21 // =, !
 #define T_BINCMP 22 // ==, +=, -=, *=, /=, >=, <=, !=, ++, --
 #define T_BITCMP 23 // &&, ||
@@ -60,7 +61,7 @@ class Lexer
         int currentLine, currentCol, currentTokenLine, currentTokenCol;
         int currentTokenCount;
         void pushCurrentToken();
-        void popSeparator(char);
+        bool popSeparator(char);
         void setTokenPosition();
         bool isAlpha(char);
         bool isNumber(char);
@@ -172,6 +173,7 @@ bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
             pushCurrentToken();
             currentTokenType = T_LPAREN;
             currentTokenValue = "";
+            openedTags.push(c);
             return true;
         }
         case ')':
@@ -179,7 +181,22 @@ bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
             pushCurrentToken();
             currentTokenType = T_RPAREN;
             currentTokenValue = "";
+            popSeparator('(')
+        }
+        case '[':
+        {
+            pushCurrentToken();
+            currentTokenType = T_LBRACKET;
+            currentTokenValue = "";
+            openedTags.push(c);
             return true;
+        }
+        case ']':
+        {
+            pushCurrentToken();
+            currentTokenType = T_RBRACKET;
+            currentTokenValue = "";
+            popSeparator('[')
         }
         case '=':
         {
@@ -239,6 +256,7 @@ bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
             currentTokenValue = "!";
             return true;
         }
+        case '^':
         case '*':
         case '/':
         case '+':
@@ -360,21 +378,26 @@ void Lexer:: parseIdentifier()
         {
             currentTokenType = T_IF;
             currentTokenValue = "";
+            openedTags.push(currentTokenValue);            
         }
         else if (currentTokenValue == "for")
         {
             currentTokenType = T_FOR;
             currentTokenValue = "";
+            openedTags.push(currentTokenValue);
         }
         else if (currentTokenValue == "while")
         {
             currentTokenType = T_WHILE;
             currentTokenValue = "";
+            if (openedTags.top() == "do") openedTags.pop();
+            openedTags.push(currentTokenValue);
         }
         else if (currentTokenValue == "do")
         {
             currentTokenType = T_DO;
             currentTokenValue = "";
+            openedTags.push(currentTokenValue);
         }
         else if (currentTokenValue == "print")
         {
@@ -399,6 +422,11 @@ void Lexer:: parseIdentifier()
         else if (currentTokenValue == "func" || currentTokenValue == "function")
         {
             currentTokenType = T_FUNC;
+            currentTokenValue = "";
+        }
+        else if (currentTokenValue == "class")
+        {
+            currentTokenType = T_CLASS;
             currentTokenValue = "";
         }
     }
@@ -464,17 +492,14 @@ void Lexer::pushCurrentToken()
     return;
 }
 
-void Lexer::popSeparator(char c)
+bool Lexer::popSeparator(char c)
 {
     if (openedTags.top() == c)
     {
         openedTags.pop();
+        return true;
     }
-    else
-    {
-        // TODO: throw error
-    }
-    return;
+    SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid operator: " + currentTokenValue + c);
 }
 
 void Lexer::setTokenPosition()
