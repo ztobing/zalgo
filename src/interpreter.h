@@ -55,7 +55,7 @@ Value Interpreter::visit(AST ast)
     // Value preorderVal = ast.left != NULL ? visit(*ast.left) : Value(I_NOMATCH, "");
 
     // Inorder tasks
-    // cout << "Current: " << ast.value << " " << ast.type << endl;
+    cout << "Current: " << ast.value << " " << ast.type << endl;
 
     switch (ast.type)
     {
@@ -148,10 +148,6 @@ Value Interpreter::visitOpr(AST ast)
     // --- MUL --- //
     if (ast.value == "*")
     {
-        if (lhs.type == T_STR || rhs.type == T_STR)
-        {
-            return Value(I_NOMATCH, "");
-        }
         if (lhs.type == T_STR && rhs.type == T_INT)
         {
             string result = "";
@@ -160,6 +156,10 @@ Value Interpreter::visitOpr(AST ast)
                 result += lhs.value;
             }
             return Value(T_STR, result);
+        }
+        if (lhs.type == T_STR || rhs.type == T_STR)
+        {
+            return Value(I_NOMATCH, "");
         }
         if (lhs.type == T_INT && rhs.type == T_INT)
         {
