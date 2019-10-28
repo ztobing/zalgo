@@ -4,8 +4,10 @@
 #define P_NOMATCH 100
 #define P_STATEMENT 101
 #define P_STATEMENTLIST 102
-#define P_FUNCTION 103
-#define P_IFACTIONS 104
+#define P_EXPRLIST 103
+#define P_ARRAY 104
+#define P_FUNCTION 105
+#define P_IFACTIONS 106
 
 #include <iostream>
 
@@ -25,9 +27,11 @@ class Parser
 
         AST program();
         AST statementList();
+        AST exprList();
         AST statement();
         AST assignStatement();
         AST ifStatement();
+        AST arrayStatement();
         AST forStatement();
         AST whileStatement();
         AST printStatement();
@@ -116,6 +120,27 @@ AST Parser::statementList()
     return statementListNode;
 }
 
+AST Parser::exprList()
+{
+    // expr_list
+    // (expr (COMMA, expr)*)*
+
+    AST exprListNode = expr();
+
+    while (currentToken.type == T_COMMA)
+    {
+        eat(T_COMMA);
+        AST newExprListNode(P_EXPRLIST, "");
+        newExprListNode.left = new AST(exprListNode);
+        AST rightNode = exprList();
+        if (rightNode.type == P_NOMATCH) return exprListNode;
+        newExprListNode.right = new AST(rightNode);
+        exprListNode = newExprListNode;
+    }
+
+    return exprListNode;
+}
+
 AST Parser::statement()
 {
     // statement
@@ -126,6 +151,10 @@ AST Parser::statement()
 
     // If Statement
     statementNode = ifStatement();
+    if (statementNode.type != P_NOMATCH) return statementNode;
+
+    // Array statement
+    statementNode = arrayStatement();
     if (statementNode.type != P_NOMATCH) return statementNode;
 
     // For Statement
@@ -256,6 +285,15 @@ AST Parser::ifStatement()
     if (!eat(T_END)) return AST(P_NOMATCH, "");
     if (!eat(T_IF)) return AST(P_NOMATCH, "");
     return ifNode;
+}
+
+AST Parser::arrayStatement()
+{
+    if (!eat(T_LBRACKET)) return AST(P_NOMATCH, "");
+    AST arrayNode(P_ARRAY, "");
+    arrayNode.left = new AST(exprList());
+    if (!eat(T_RBRACKET)) return AST(P_NOMATCH, "");
+    return arrayNode;
 }
 
 AST Parser::forStatement()
