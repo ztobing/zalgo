@@ -1,8 +1,9 @@
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 
-#define I_NOMATCH 300
-#define I_COMPLETE 301
+#define I_NOMATCH 200
+#define I_NONE 201
+#define I_COMPLETE 202
 
 #include <iostream>
 #include <map>
@@ -24,6 +25,7 @@ class Interpreter
         Value visitAssign(AST);
         Value visitOpr(AST);
         Value visitVar(AST);
+        Value visitInt(AST);
         Value visitFloat(AST);
     public:
         Interpreter(AST);
@@ -52,20 +54,17 @@ Value Interpreter::visit(AST ast)
     // Value preorderVal = ast.left != NULL ? visit(*ast.left) : Value(I_NOMATCH, "");
 
     // Inorder tasks
-    cout << "Current: " << ast.value << " " << ast.type << endl;
+    // cout << "Current: " << ast.value << " " << ast.type << endl;
 
     switch (ast.type)
     {
-        case P_STATEMENTLIST:
-            return visitStatementList(ast);
-        case T_ASSIGN:
-            return visitAssign(ast);
-        case T_OPR:
-            return visitOpr(ast);
-        case T_FLOAT:
-            return visitFloat(ast);
-        default:
-            break;
+        case P_STATEMENTLIST:   return visitStatementList(ast);
+        case T_ASSIGN:          return visitAssign(ast);
+        case T_OPR:             return visitOpr(ast);
+        case T_INT:             return visitInt(ast);
+        case T_FLOAT:           return visitFloat(ast);
+        case T_VAR:             return visitVar(ast);
+        default:                break;
     }
 
     // Postorder tasks
@@ -89,147 +88,130 @@ Value Interpreter::visitAssign(AST ast)
     return Value(I_COMPLETE, "");
 }
 
+
 Value Interpreter::visitOpr(AST ast)
 {
-    // --- BASE CASE --- //
-    if ((ast.type == T_INT || ast.type == T_FLOAT) && ast.left == nullptr && ast.right == nullptr)
+    // Process the deepest node before processing
+    Value lhs = ast.left ? visit(*ast.left) : Value(I_NONE, "");
+    Value rhs = ast.right ? visit(*ast.right) : Value(I_NONE, "");
+    if (lhs.type == I_NONE || rhs.type == I_NONE)
     {
-        return Value(ast.type, ast.value);
-    }
-    else if (ast.type == T_VAR)
-    {
-        return visitVar(ast);
+        cout << "NONE" << endl;
     }
 
-    // --- UNARY --- //
-    if ((ast.value == "-" || ast.value == "+") && ast.right == NULL)
-    {
-        if (ast.left->type == T_INT)
-        {
-            if (ast.value == "-") return Value(T_INT, to_string(-stoi(visitOpr(*ast.left).value)));
-            if (ast.value == "+") return Value(T_INT, to_string(+stoi(visitOpr(*ast.left).value)));
-        }
-        else if (ast.left->type == T_FLOAT)
-        {
-            if (ast.value == "-") return Value(T_FLOAT, to_string(-stod(visitOpr(*ast.left).value)));
-            if (ast.value == "+") return Value(T_FLOAT, to_string(+stod(visitOpr(*ast.left).value)));
-        }
-    }
+    if (!(lhs.type == T_INT || lhs.type == T_FLOAT || lhs.type == T_STR)) return Value(I_NOMATCH, "");
+    if (!(rhs.type == T_INT || rhs.type == T_FLOAT || rhs.type == T_STR)) return Value(I_NOMATCH, "");
 
     // --- ADD --- //
     if (ast.value == "+")
     {
-        Value leftHand, rightHand;
-        leftHand = ast.left->type == T_OPR ? visitOpr(*ast.left) : Value(ast.left->type, ast.left->value);
-        rightHand = ast.right->type == T_OPR ? visitOpr(*ast.right) : Value(ast.right->type, ast.right->value);
-        // Integer
-        if (leftHand.type == T_INT && rightHand.type == T_INT)
+        if (lhs.type == T_STR || rhs.type == T_STR)
         {
-            return Value(T_INT, to_string(stoi(visitOpr(*ast.left).value) + stoi(visitOpr(*ast.right).value)));
+            string result = lhs.value + rhs.value;
+            return Value(T_STR, result);
         }
-        // Float
-        if (leftHand.type == T_FLOAT || rightHand.type == T_FLOAT)
+        if (lhs.type == T_INT && rhs.type == T_INT)
         {
-            return Value(T_FLOAT, to_string(stod(visitOpr(*ast.left).value) + stod(visitOpr(*ast.right).value)));
+            int result = stoi(lhs.value) + stoi(rhs.value);
+            return Value(T_INT, to_string(result));
         }
-        // String
-        if (leftHand.type == T_STR || rightHand.type == T_STR)
+        if (lhs.type == T_FLOAT || rhs.type == T_FLOAT)
         {
-            return Value(T_STR, leftHand.value + rightHand.value);
+            double result = stod(lhs.value) + stod(rhs.value);
+            return Value(T_FLOAT, to_string(result));
         }
+        return Value(I_NOMATCH, "");
     }
 
-    // --- SUB --- //
+    // --- MIN --- //
     if (ast.value == "-")
     {
-        Value leftHand, rightHand;
-        leftHand = ast.left->type == T_OPR ? visitOpr(*ast.left) : Value(ast.left->type, ast.left->value);
-        rightHand = ast.right->type == T_OPR ? visitOpr(*ast.right) : Value(ast.right->type, ast.right->value);
-        // Integer
-        if (leftHand.type == T_INT && rightHand.type == T_INT)
-        {
-            return Value(T_INT, to_string(stoi(leftHand.value) - stoi(rightHand.value)));
-        }
-        // Float
-        if (leftHand.type == T_FLOAT || rightHand.type == T_FLOAT)
-        {
-            return Value(T_FLOAT, to_string(stod(leftHand.value) - stod(rightHand.value)));
-        }
-        // String
-        if (leftHand.type == T_STR || rightHand.type == T_STR)
+        if (lhs.type == T_STR || rhs.type == T_STR)
         {
             return Value(I_NOMATCH, "");
         }
+        if (lhs.type == T_INT && rhs.type == T_INT)
+        {
+            int result = stoi(lhs.value) - stoi(rhs.value);
+            return Value(T_INT, to_string(result));
+        }
+        if (lhs.type == T_FLOAT || rhs.type == T_FLOAT)
+        {
+            int result = stod(lhs.value) - stod(rhs.value);
+            return Value(T_FLOAT, to_string(result));
+        }
+        return Value(I_NOMATCH, "");
     }
 
     // --- MUL --- //
     if (ast.value == "*")
     {
-        Value leftHand, rightHand;
-        leftHand = ast.left->type == T_OPR ? visitOpr(*ast.left) : Value(ast.left->type, ast.left->value);
-        rightHand = ast.right->type == T_OPR ? visitOpr(*ast.right) : Value(ast.right->type, ast.right->value);
-        // Integer
-        if (leftHand.type == T_INT && rightHand.type == T_INT)
-        {
-            return Value(T_INT, to_string(stoi(leftHand.value) * stoi(rightHand.value)));
-        }
-        // Float
-        if (leftHand.type == T_FLOAT || rightHand.type == T_FLOAT)
-        {
-            return Value(T_FLOAT, to_string(stod(leftHand.value) * stod(rightHand.value)));
-        }
-        // String
-        if (leftHand.type == T_STR || rightHand.type == T_STR)
+        if (lhs.type == T_STR || rhs.type == T_STR)
         {
             return Value(I_NOMATCH, "");
         }
+        if (lhs.type == T_STR && rhs.type == T_INT)
+        {
+            string result = "";
+            for (int i = 0; i < stoi(rhs.value); i++)
+            {
+                result += lhs.value;
+            }
+            return Value(T_STR, result);
+        }
+        if (lhs.type == T_INT && rhs.type == T_INT)
+        {
+            int result = stoi(lhs.value) * stoi(rhs.value);
+            return Value(T_INT, to_string(result));
+        }
+        if (lhs.type == T_FLOAT || rhs.type == T_FLOAT)
+        {
+            int result = stod(lhs.value) * stod(rhs.value);
+            return Value(T_FLOAT, to_string(result));
+        }
+        return Value(I_NOMATCH, "");
     }
 
     // --- DIV --- //
     if (ast.value == "/")
     {
-        Value leftHand, rightHand;
-        leftHand = ast.left->type == T_OPR ? visitOpr(*ast.left) : Value(ast.left->type, ast.left->value);
-        rightHand = ast.right->type == T_OPR ? visitOpr(*ast.right) : Value(ast.right->type, ast.right->value);
-        // Integer
-        if (leftHand.type == T_INT && rightHand.type == T_INT)
-        {
-            return Value(T_INT, to_string(stoi(leftHand.value) / stoi(rightHand.value)));
-        }
-        // Float
-        if (leftHand.type == T_FLOAT || rightHand.type == T_FLOAT)
-        {
-            return Value(T_FLOAT, to_string(stod(leftHand.value) / stod(rightHand.value)));
-        }
-        // String
-        if (leftHand.type == T_STR || rightHand.type == T_STR)
+        if (lhs.type == T_STR || rhs.type == T_STR)
         {
             return Value(I_NOMATCH, "");
         }
+        if (lhs.type == T_INT && rhs.type == T_INT)
+        {
+            int result = stoi(lhs.value) / stoi(rhs.value);
+            return Value(T_INT, to_string(result));
+        }
+        if (lhs.type == T_FLOAT || rhs.type == T_FLOAT)
+        {
+            int result = stod(lhs.value) / stod(rhs.value);
+            return Value(T_FLOAT, to_string(result));
+        }
+        return Value(I_NOMATCH, "");
     }
 
     // --- POW --- //
     if (ast.value == "^")
     {
-        Value leftHand, rightHand;
-        leftHand = ast.left->type == T_OPR ? visitOpr(*ast.left) : Value(ast.left->type, ast.left->value);
-        rightHand = ast.right->type == T_OPR ? visitOpr(*ast.right) : Value(ast.right->type, ast.right->value);
-        // Integer
-        if (leftHand.type == T_INT && rightHand.type == T_INT)
-        {
-            return Value(T_INT, to_string(pow(stoi(leftHand.value), stoi(rightHand.value))));
-        }
-        // Float
-        if (leftHand.type == T_FLOAT || rightHand.type == T_FLOAT)
-        {
-            return Value(T_FLOAT, to_string(pow(stod(leftHand.value), stod(rightHand.value))));
-        }
-        // String
-        if (leftHand.type == T_STR || rightHand.type == T_STR)
+        if (lhs.type == T_STR || rhs.type == T_STR)
         {
             return Value(I_NOMATCH, "");
         }
+        if (lhs.type == T_INT && rhs.type == T_INT)
+        {
+            int result = pow(stoi(lhs.value), stoi(rhs.value));
+            return Value(T_INT, to_string(result));
+        }
+        if (lhs.type == T_FLOAT || rhs.type == T_FLOAT)
+        {
+            int result = pow(stod(lhs.value), stod(rhs.value));
+            return Value(T_FLOAT, to_string(result));
+        }
+        return Value(I_NOMATCH, "");
     }
+
     return Value(I_NOMATCH, "");
 }
 
@@ -237,16 +219,27 @@ Value Interpreter::visitVar(AST ast)
 {
     if (ast.type != T_VAR)
     ; // Throw exception
+
     if (GLOBAL_SCOPE.find(ast.value) == GLOBAL_SCOPE.end())
-    ; // Throw exception
+    ; // Throw exception (IMPORTANT)
+
     return GLOBAL_SCOPE[ast.value];
+}
+
+Value Interpreter::visitInt(AST ast)
+{
+    if (ast.type != T_INT)
+    ; // Throw exception
+
+    return Value(T_INT, ast.value);
 }
 
 Value Interpreter::visitFloat(AST ast)
 {
     if (ast.type != T_FLOAT)
     ; // Throw exception
-    return Value(ast.type, ast.value);
+
+    return Value(T_FLOAT, ast.value);
 }
 
 #endif
