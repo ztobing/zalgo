@@ -39,6 +39,7 @@
 #define T_RPAREN 41 // )
 #define T_LBRACKET 42 // [
 #define T_RBRACKET 43 // ]
+#define T_COMMA 44 // ,
 
 #include <iostream>
 #include <queue>
@@ -211,7 +212,7 @@ bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
                 }
                 SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid operator: " + currentTokenValue + c);
             }
-            else if (currentTokenType == T_BINCMP)
+            else if (currentTokenType == T_BINCMP || currentTokenType == T_ASSIGN)
             {
                 if (currentTokenValue.length() >= 2)
                 {
@@ -253,7 +254,7 @@ bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
                 // return error 
             }
             pushCurrentToken();
-            currentTokenType = T_BINCMP;
+            currentTokenType = T_ASSIGN;
             currentTokenValue = "!";
             return true;
         }
@@ -451,13 +452,37 @@ void Lexer:: parseIdentifier()
             currentTokenType = T_CLASS;
             currentTokenValue = "";
         }
+        else if (currentTokenValue == "and")
+        {
+            currentTokenType = T_BITCMP;
+            currentTokenValue = "&&";
+        }
+        else if (currentTokenValue == "or")
+        {
+            currentTokenType = T_BITCMP;
+            currentTokenValue = "||";
+        }
+        else if (currentTokenValue == "is")
+        {
+            currentTokenType = T_ASSIGN;
+            currentTokenValue = "=";
+        }
+        else if (currentTokenValue == "equals")
+        {
+            currentTokenType = T_BINCMP;
+            currentTokenValue = "==";
+        }
+        else if (currentTokenValue == "not")
+        {
+            currentTokenType = T_ASSIGN;
+            currentTokenValue = "!";
+        }
     }
 }
 
 bool Lexer::parseEOF(char c, string currentLineContent, int line, int col)
 {
     // Handle EOF
-    cout << openedTags.size() << endl;
     if (c == -1)
     {
         if (!openedTags.empty())
