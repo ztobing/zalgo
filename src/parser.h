@@ -5,6 +5,7 @@
 #define P_STATEMENT 101
 #define P_STATEMENTLIST 102
 #define P_FUNCTION 103
+#define P_IFACTIONS 104
 
 #include <iostream>
 
@@ -26,8 +27,11 @@ class Parser
         AST statementList();
         AST statement();
         AST assignStatement();
-        AST compareStatement();
+        AST ifStatement();
+        AST forStatement();
+        AST whileStatement();
         AST printStatement();
+        AST compareStatement();
         AST expr();
         AST term();
         AST factor();
@@ -83,7 +87,7 @@ AST Parser::program()
 {
     // program
     // statement_list EOF
-    cout << "program START" << endl;
+    // cout << "program START" << endl;
 
     AST programNode = statementList();
     if (!eat(T_EOF)) cout << "EOF NOT FOUND" << endl; // Throw exception
@@ -94,7 +98,7 @@ AST Parser::statementList()
 {
     // statement_list
     // statement NEWLINE statement_list 
-    cout << "statement_list START" << endl;
+    // cout << "statement_list START" << endl;
 
     AST statementListNode = statement();
 
@@ -108,20 +112,29 @@ AST Parser::statementList()
         newStatementListNode.right = new AST(rightNode);
         statementListNode = newStatementListNode;
     }
-    cout << "statement_list END" << endl;
+    // cout << "statement_list END" << endl;
     return statementListNode;
 }
 
 AST Parser::statement()
 {
     // statement
-    // block_statement | assignment_statement | compare_statement | call_statement | print_statement empty
-    cout << "statement START" << endl;
+    // if_statement | for_statement | while_statement | assignment_statement | compare_statement | call_statement | print_statement empty
+    // cout << "statement START" << endl;
 
     AST statementNode(P_STATEMENT, "");
 
-    // Block Statement
+    // If Statement
+    statementNode = ifStatement();
+    if (statementNode.type != P_NOMATCH) return statementNode;
 
+    // For Statement
+    // statementNode = forStatement();
+    // if (statementNode.type != P_NOMATCH) return statementNode;
+
+    // While Statement
+    // statementNode = whileStatement();
+    // if (statementNode.type != P_NOMATCH) return statementNode;
 
     // Assignment Statement
     statementNode = assignStatement();
@@ -132,7 +145,7 @@ AST Parser::statement()
     // Print Statement
     statementNode = printStatement();
     if (statementNode.type != P_NOMATCH) return statementNode;
-    
+
     // Compare Statement
     statementNode = compareStatement();
     if (statementNode.type != P_NOMATCH) return statementNode;
@@ -140,7 +153,7 @@ AST Parser::statement()
     // Empty Statement
 
     // Unknown
-    cout << "statement END" << endl;
+    // cout << "statement END" << endl;
     return AST(P_NOMATCH, "");
 }
 
@@ -148,7 +161,7 @@ AST Parser::assignStatement()
 {
     // assign_statement
     // variable ASSIGN expr | function variable LPAREN (variable (COMMA variable)*)* RPAREN NEWLINE 
-    cout << "assignStatement START" << endl;
+    // cout << "assignStatement START" << endl;
 
     // Variable definition
     if (currentToken.type == T_VAR)
@@ -160,7 +173,7 @@ AST Parser::assignStatement()
         eat(T_ASSIGN);
         assignNode.left = new AST(T_VAR, varToken.value);
         assignNode.right = new AST(expr());
-        cout << "assignStatement END" << endl;
+        // cout << "assignStatement END" << endl;
         return assignNode;
     }
     // Function definition
@@ -189,6 +202,74 @@ AST Parser::assignStatement()
     return AST(P_NOMATCH, "");
 }
 
+AST Parser::ifStatement()
+{
+    // if_statement
+    // IF compare_statement THEN statement_list* (ELSE if_statement)* END IF
+    if (!eat(T_IF)) return AST(P_NOMATCH, "");
+    AST compareNode = compareStatement();
+    if (compareNode.type == P_NOMATCH) return AST(P_NOMATCH, "");
+    if (!eat(T_THEN)) return AST(P_NOMATCH, "");
+    if (!eat(T_COMMANDNEND)) return AST(P_NOMATCH, "");
+    AST ifNode(T_IF, "");
+    ifNode.left = new AST(compareNode);
+    ifNode.right = new AST(P_IFACTIONS, "");
+    ifNode.right->left = new AST(statementList());
+    cout << "ASD" << endl;
+
+    while (currentToken.type == T_ELSE)
+    {
+        eat(T_ELSE);
+        if (eat(T_IF))
+        {
+            AST newIfNode(T_IF, "");
+            newIfNode.left = new AST(expr());
+            if (!eat(T_THEN)) AST(P_NOMATCH, "");
+            if (!eat(T_COMMANDNEND)) AST(P_NOMATCH, "");
+            AST ifActionNode(P_IFACTIONS, "");
+            ifActionNode.left = new AST(statementList());
+            newIfNode.right = new AST(ifActionNode);
+
+            // Assign to deepest node
+            AST* currentNode = ifNode.right;
+            while (currentNode->right != NULL)
+            {
+                currentNode = currentNode->right;
+            }
+            currentNode->right = new AST(newIfNode);
+            
+        }
+        else
+        {
+            if (!eat(T_COMMANDNEND)) AST(P_NOMATCH, "");
+            AST elseNode(statementList());
+
+            // Assign to deepest node
+            AST* currentNode = ifNode.right;
+            while (currentNode->right != NULL)
+            {
+                currentNode = currentNode->right;
+            }
+            currentNode->right = new AST(elseNode);
+            break;
+        }
+    }
+    if (!eat(T_END)) return AST(P_NOMATCH, "");
+    if (!eat(T_IF)) return AST(P_NOMATCH, "");
+    cout << "IF DONE" << endl;
+    return ifNode;
+}
+
+AST Parser::forStatement()
+{
+    
+}
+
+AST Parser::whileStatement()
+{
+    
+}
+
 AST Parser::compareStatement()
 {
     // compare_statement
@@ -196,7 +277,7 @@ AST Parser::compareStatement()
 
     AST leftExpr = expr();
     Token compareToken = currentToken;
-    if (!eat(T_BINCMP) || !eat(T_BITCMP)) return AST(P_NOMATCH, "")
+    if (!(eat(T_BINCMP) || eat(T_BITCMP))) return AST(P_NOMATCH, "")
     ; // Throw exception
     AST rightExpr = expr();
     AST compareAST(compareToken.type, compareToken.value);
@@ -220,7 +301,7 @@ AST Parser::expr()
 {
     // expr
     // term ((ADD | SUB) term)*
-    cout << "expr START" << endl;
+    // cout << "expr START" << endl;
 
     Token token = currentToken;
     AST exprNode = term();
@@ -234,7 +315,7 @@ AST Parser::expr()
         newExprNode.right = new AST(term());
         exprNode = newExprNode;
     }
-    cout << "expr END" << endl;
+    // cout << "expr END" << endl;
     return exprNode;
 }
 
@@ -242,7 +323,7 @@ AST Parser::term()
 {
     // term
     // factor ((MUL | DIV) factor)*
-    cout << "term START" << endl;
+    // cout << "term START" << endl;
 
     AST termNode = factor();
     while (currentToken.type == T_OPR && (currentToken.value == "*" || currentToken.value == "/"))
@@ -255,7 +336,7 @@ AST Parser::term()
         newTermNode.right = new AST(factor());
         termNode = newTermNode;
     }
-    cout << "term END" << endl;
+    // cout << "term END" << endl;
     return termNode;
 }
 
@@ -265,7 +346,7 @@ AST Parser::factor()
     // PLUS factor | MIN factor | INT | LPAREN expr RPAREN | variable | string
 
     Token token = currentToken;
-    cout << "Factor: " << currentToken.value << endl;
+    // cout << "Factor: " << currentToken.value << endl;
     // Unary plus/minus
     if (currentToken.type == T_OPR && (currentToken.value == "+" || currentToken.value == "-"))
     {
