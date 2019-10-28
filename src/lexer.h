@@ -385,14 +385,24 @@ void Lexer:: parseIdentifier()
         else if (currentTokenValue == "for")
         {
             currentTokenType = T_FOR;
-            if (!openedTags.empty()) if (openedTags.top() == currentTokenValue) openedTags.pop();
+            if (!openedTags.empty()) if (openedTags.top() == currentTokenValue)
+            {
+                openedTags.pop();
+                currentTokenValue = "";
+                return;
+            }
             openedTags.push(currentTokenValue);
             currentTokenValue = "";
         }
         else if (currentTokenValue == "while")
         {
             currentTokenType = T_WHILE;
-            if (!openedTags.empty()) if (openedTags.top() == "do" || openedTags.top() == currentTokenValue) openedTags.pop();
+            if (!openedTags.empty()) if (openedTags.top() == "do" || openedTags.top() == currentTokenValue)
+            {
+                openedTags.pop();
+                currentTokenValue = "";
+                return;
+            }
             openedTags.push(currentTokenValue);
             currentTokenValue = "";
         }
@@ -405,7 +415,12 @@ void Lexer:: parseIdentifier()
         else if (currentTokenValue == "func" || currentTokenValue == "function")
         {
             currentTokenType = T_FUNC;
-            if (!openedTags.empty()) if (openedTags.top() == currentTokenValue) openedTags.pop();
+            if (!openedTags.empty()) if (openedTags.top() == currentTokenValue)
+            {
+                openedTags.pop();
+                currentTokenValue = "";
+                return;
+            }
             openedTags.push(currentTokenValue);
             currentTokenValue = "";
         }
