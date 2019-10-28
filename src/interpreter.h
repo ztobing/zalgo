@@ -27,6 +27,7 @@ class Interpreter
         Value visitVar(AST);
         Value visitInt(AST);
         Value visitFloat(AST);
+        Value visitString(AST);
     public:
         Interpreter(AST);
         void interpret();
@@ -64,6 +65,7 @@ Value Interpreter::visit(AST ast)
         case T_INT:             return visitInt(ast);
         case T_FLOAT:           return visitFloat(ast);
         case T_VAR:             return visitVar(ast);
+        case T_STR:             return visitString(ast);
         default:                break;
     }
 
@@ -240,6 +242,14 @@ Value Interpreter::visitFloat(AST ast)
     ; // Throw exception
 
     return Value(T_FLOAT, ast.value);
+}
+
+Value Interpreter::visitString(AST ast)
+{
+    if (ast.type != T_STR)
+    ; // Throw exception
+
+    return Value(T_STR, ast.value);
 }
 
 #endif
