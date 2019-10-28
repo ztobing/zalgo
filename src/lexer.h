@@ -126,7 +126,7 @@ bool Lexer::parseString(char c, string currentLineContent, int line, int col)
             currentTokenType = T_STR;
             return true;
         }
-        SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid operator");
+        SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid escape symbol");
     }
     if (currentTokenType == T_STR && string(1, c) != openedTags.top())
     {
@@ -183,7 +183,7 @@ bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
             pushCurrentToken();
             currentTokenType = T_RPAREN;
             currentTokenValue = "";
-            popSeparator("(");
+            return popSeparator("(");
         }
         case '[':
         {
@@ -198,7 +198,7 @@ bool Lexer::parseSymbol(char c, string currentLineContent, int line, int col)
             pushCurrentToken();
             currentTokenType = T_RBRACKET;
             currentTokenValue = "";
-            popSeparator("[");
+            return popSeparator("[");
         }
         case '=':
         {
