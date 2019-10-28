@@ -367,7 +367,12 @@ void Lexer:: parseIdentifier()
         if (currentTokenValue == "if")
         {
             currentTokenType = T_IF;
-            if (!openedTags.empty()) if (openedTags.top() == currentTokenValue) openedTags.pop();
+            if (!openedTags.empty()) if (openedTags.top() == currentTokenValue)
+            {
+                openedTags.pop();
+                currentTokenValue = "";
+                return;
+            }
             openedTags.push(currentTokenValue);
             currentTokenValue = "";
         }
