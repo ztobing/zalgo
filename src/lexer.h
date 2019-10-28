@@ -436,10 +436,10 @@ void Lexer:: parseIdentifier()
             currentTokenType = T_END;
             currentTokenValue = "";
             if (!openedTags.empty()) if (openedTags.top() == "then")
-                {
-                    openedTags.pop();
-                    return;
-                }
+            {
+                openedTags.pop();
+                return;
+            }
             SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid operator: " + currentTokenValue);
         }
         else if (currentTokenValue == "func" || currentTokenValue == "function")
@@ -470,7 +470,8 @@ void Lexer:: parseIdentifier()
         else if (currentTokenValue == "equals")
         {
             currentTokenType = T_BINCMP;
-            currentTokenValue = "==";
+            if (tokens.back().value == "!") currentTokenValue = "!=";
+            else currentTokenValue = "==";
         }
         else if (currentTokenValue == "not")
         {
