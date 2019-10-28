@@ -133,8 +133,8 @@ AST Parser::statement()
     // if (statementNode.type != P_NOMATCH) return statementNode;
 
     // While Statement
-    // statementNode = whileStatement();
-    // if (statementNode.type != P_NOMATCH) return statementNode;
+    statementNode = whileStatement();
+    if (statementNode.type != P_NOMATCH) return statementNode;
 
     // Assignment Statement
     statementNode = assignStatement();
@@ -267,7 +267,14 @@ AST Parser::forStatement()
 
 AST Parser::whileStatement()
 {
-    
+    if (!eat(T_WHILE)) return AST(P_NOMATCH, "");
+    AST whileNode(T_WHILE, "");
+    whileNode.left = new AST(compareStatement());
+    if (!eat(T_THEN)) return AST(P_NOMATCH, "");
+    whileNode.right = new AST(statementList());
+    if (!eat(T_END)) return AST(P_NOMATCH, "");
+    if (!eat(T_WHILE)) return AST(P_NOMATCH, "");
+    return whileNode;
 }
 
 AST Parser::compareStatement()
