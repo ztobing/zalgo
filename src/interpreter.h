@@ -54,13 +54,6 @@ void Interpreter::interpret()
 
 Value Interpreter::visit(AST ast)
 {
-    // Preorder tasks
-    // if (ast.left != NULL) visit(*ast.left);
-    // Value preorderVal = ast.left != NULL ? visit(*ast.left) : Value(I_NOMATCH, "");
-
-    // Inorder tasks
-    // cout << "Current: " << ast.value << " " << ast.type << endl;
-
     switch (ast.type)
     {
         case P_STATEMENTLIST:   return visitStatementList(ast);
@@ -78,8 +71,6 @@ Value Interpreter::visit(AST ast)
         default:                break;
     }
 
-    // Postorder tasks
-    // if (ast.right != NULL) visit(*ast.right);
     return Value(P_NOMATCH, "");
 }
 
