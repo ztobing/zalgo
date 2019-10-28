@@ -42,7 +42,7 @@
 #define T_COMMA 44 // ,
 
 #include <iostream>
-#include <queue>
+#include <deque>
 #include <stack>
 #include <algorithm>
 
@@ -55,7 +55,7 @@ using namespace std;
 class Lexer
 {
     private:
-        queue<Token> tokens;
+        deque<Token> tokens;
         stack<string> openedTags;
         int currentTokenType;
         string currentTokenValue, currentLineContent;
@@ -492,7 +492,7 @@ bool Lexer::parseEOF(char c, string currentLineContent, int line, int col)
         }
         
         pushCurrentToken();
-        tokens.push(Token(currentTokenLine, currentTokenCol, T_EOF, ""));
+        tokens.push_back(Token(currentTokenLine, currentTokenCol, T_EOF, ""));
         return true;
     }
     return false;
@@ -503,7 +503,7 @@ Token Lexer::next()
     if (tokens.empty()) return Token(currentTokenLine, currentTokenCol, T_EOF, "");
     
     Token token = tokens.front();
-    tokens.pop();
+    tokens.pop_front();
     return token;
 }
 
@@ -520,7 +520,7 @@ void Lexer::pushEOL()
     if (currentTokenType != T_NONE)
         parseIdentifier();
         pushCurrentToken();
-    if (tokens.size() != currentTokenCount) tokens.push(Token(currentTokenLine, currentTokenCol, T_COMMANDNEND, ""));
+    if (tokens.size() != currentTokenCount) tokens.push_back(Token(currentTokenLine, currentTokenCol, T_COMMANDNEND, ""));
     currentTokenCount = tokens.size();
 }
 
@@ -539,7 +539,7 @@ bool Lexer::eof()
 void Lexer::pushCurrentToken()
 {
     if (currentTokenType != T_NONE)
-        tokens.push(Token(currentTokenLine, currentTokenCol, currentTokenType, currentTokenValue));
+        tokens.push_back(Token(currentTokenLine, currentTokenCol, currentTokenType, currentTokenValue));
     currentTokenType = T_NONE;
     currentTokenValue = "";
     setTokenPosition();
