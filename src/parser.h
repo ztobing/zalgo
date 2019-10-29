@@ -381,7 +381,7 @@ AST Parser::term()
 AST Parser::factor()
 {
     // factor
-    // PLUS factor | MIN factor | INT | LPAREN expr RPAREN | variable | string
+    // PLUS factor | MIN factor | INT | LPAREN expr RPAREN | variable | string | input | array
 
     Token token = currentToken;
     // cout << "Factor: " << currentToken.value << endl;
