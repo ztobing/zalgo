@@ -16,17 +16,21 @@
 #include "ast.h"
 #include "parser.h"
 #include "value.h"
+#include "function.h"
 
 class Interpreter
 {
     private:
         AST ast;
         map<string, Value> GLOBAL_SCOPE;
+        map<string, Function> GLOBAL_FUNC;
         Value visit(AST);
         Value visitArray(AST);
         Value visitStatementList(AST);
         Value visitExprList(AST);
         Value visitAssign(AST);
+        Value visitFuncDef(AST);
+        Value visitFuncDefParam(AST);
         Value visitIf(AST);
         Value visitFor(AST);
         Value visitWhile(AST);
@@ -65,6 +69,8 @@ Value Interpreter::visit(AST ast)
         case P_STATEMENTLIST:   return visitStatementList(ast);
         case P_EXPRLIST:        return visitExprList(ast);
         case T_ASSIGN:          return visitAssign(ast);
+        case P_FUNCTION:        return visitFuncDef(ast);
+        case P_FUNCPARAM:       return visitFuncDefParam(ast);
         case T_IF:              return visitIf(ast);
         case T_FOR:             return visitFor(ast);
         case T_WHILE:           return visitWhile(ast);
@@ -119,6 +125,26 @@ Value Interpreter::visitIf(AST ast)
         return Value(I_COMPLETE, "");
     }
     return visit(*ast.right->left);
+}
+
+Value Interpreter::visitFuncDef(AST ast)
+{
+    AST funcParams = *ast.left;
+    AST funcOperations = *ast.right;
+    Value funcParamsValue = visitFuncDefParam(funcParams);
+    GLOBAL_FUNC[ast.value] = Function(funcParamsValue, funcOperations);
+    return Value(I_COMPLETE, "");
+}
+
+Value Interpreter::visitFuncDefParam(AST ast)
+{
+    vector<Value> params;
+    while (ast.left)
+    {
+        params.push_back(Value(ast.left->type, ast.left->value));
+        ast = *ast.left;
+    }
+    return Value(P_FUNCPARAM, params);
 }
 
 Value Interpreter::visitFor(AST ast)
