@@ -159,8 +159,8 @@ AST Parser::statement()
     if (statementNode.type != P_NOMATCH) return statementNode;
 
     // For Statement
-    // statementNode = forStatement();
-    // if (statementNode.type != P_NOMATCH) return statementNode;
+    statementNode = forStatement();
+    if (statementNode.type != P_NOMATCH) return statementNode;
 
     // While Statement
     statementNode = whileStatement();
@@ -233,6 +233,7 @@ AST Parser::ifStatement()
 {
     // if_statement
     // IF compare_statement THEN statement_list* (ELSE if_statement)* END IF
+
     if (!eat(T_IF)) return AST(P_NOMATCH, "");
     AST compareNode = compareStatement();
     if (compareNode.type == P_NOMATCH) return AST(P_NOMATCH, "");
@@ -296,7 +297,28 @@ AST Parser::arrayStatement()
 
 AST Parser::forStatement()
 {
+    // for_statement
+    // FOR variable in ((expr TO expr)|array) statement_list END FOR
+
+    if (!eat(T_FOR)) return AST(P_NOMATCH, "");
+    Token token = currentToken;
+    if (!eat(T_VAR)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: variable");
+    if (!eat(T_IN)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: 'in'");
+
+    // expr to expr
+    AST toNode(T_TO, "");
+    toNode.left = new AST(expr());
+    if (!eat(T_TO)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: 'to'");
+    toNode.right = new AST(expr());
+
+    if (!eat(T_THEN)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: 'then'");
     
+    AST forNode(T_FOR, token.value);
+    forNode.left = new AST(toNode);
+    forNode.right = new AST(statementList());
+    if (!eat(T_END)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: 'end'");
+    if (!eat(T_FOR)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: 'for'");
+    return forNode;
 }
 
 AST Parser::whileStatement()
