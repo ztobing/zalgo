@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <map>
+#include <vector>
 #include <math.h>
 
 #include "token.h"
@@ -21,7 +22,9 @@ class Interpreter
         AST ast;
         map<string, Value> GLOBAL_SCOPE;
         Value visit(AST);
+        Value visitArray(AST);
         Value visitStatementList(AST);
+        Value visitExprList(AST);
         Value visitAssign(AST);
         Value visitIf(AST);
         Value visitWhile(AST);
@@ -57,6 +60,7 @@ Value Interpreter::visit(AST ast)
     switch (ast.type)
     {
         case P_STATEMENTLIST:   return visitStatementList(ast);
+        case P_EXPRLIST:        return visitExprList(ast);
         case T_ASSIGN:          return visitAssign(ast);
         case T_IF:              return visitIf(ast);
         case T_WHILE:           return visitWhile(ast);
@@ -67,11 +71,22 @@ Value Interpreter::visit(AST ast)
         case T_FLOAT:           return visitFloat(ast);
         case T_VAR:             return visitVar(ast);
         case T_STR:             return visitString(ast);
+        case P_ARRAY:           return visitArray(ast);
         case T_PRINT:           return visitPrint(ast);
         default:                break;
     }
 
     return Value(P_NOMATCH, "");
+}
+
+Value Interpreter::visitExprList(AST ast)
+{
+    vector<Value> exprs;
+    if (ast.left) 
+    {
+        Value expr = visit(*ast.left);
+        exprs.push_back(Value(expr.type, expr.value, expr.values));
+    }
 }
 
 Value Interpreter::visitStatementList(AST ast)
@@ -472,6 +487,11 @@ Value Interpreter::visitString(AST ast)
     ; // Throw exception
 
     return Value(T_STR, ast.value);
+}
+
+Value Interpreter::visitArray(AST ast)
+{
+
 }
 
 Value Interpreter::visitPrint(AST ast)
