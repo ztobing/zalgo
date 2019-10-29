@@ -129,7 +129,13 @@ bool Lexer::parseString(char c, string currentLineContent, int line, int col)
             currentTokenType = T_STR;
             return true;
         }
-        SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid escape symbol.");
+        else if (c == 'n')
+        {
+            currentTokenValue += "\\n";
+            currentTokenType = T_STR;
+            return true;
+        }
+        SyntaxError(currentTokenLine, currentCol, currentLineContent, "Invalid escape character.");
     }
     if (currentTokenType == T_STR && string(1, c) != openedTags.top())
     {

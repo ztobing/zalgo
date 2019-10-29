@@ -219,7 +219,7 @@ AST Parser::assignStatement()
             // Add parameter processing
         }
         if (!eat(T_RPAREN)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: ')'"); // Throw exception
-        if (!eat(T_COMMANDNEND))SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: '\n'"); // Throw exception
+        if (!eat(T_COMMANDNEND))SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: 'eol'"); // Throw exception
         // functionNode.left = new AST(); // Add parameter list
         functionNode.right = new AST(statementList());
         if (!eat(T_END)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: 'end'"); // Throw exception
@@ -436,8 +436,6 @@ AST Parser::factor()
         return arrayStatement();
     }
 
-    // Unknown
-    SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: 'no match'"); // Throw exception
     return AST(P_NOMATCH, "");
 }
 
