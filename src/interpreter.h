@@ -509,7 +509,11 @@ Value Interpreter::visitInput(AST ast)
 
 Value Interpreter::visitArray(AST ast)
 {
-
+    vector<Value> exprs;
+    if (ast.left) 
+    {
+        exprs.push_back(Value(ast.type, ast.value));
+    }
 }
 
 Value Interpreter::visitPrint(AST ast)
