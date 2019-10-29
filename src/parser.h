@@ -42,6 +42,7 @@ class Parser
         AST variable();
         AST function();
         AST string();
+        AST input();
     public:
         Parser();
         Parser(Lexer);
@@ -424,6 +425,11 @@ AST Parser::factor()
     {
         return string();
     }
+    // Input
+    if (currentToken.type == T_INPUT)
+    {
+        return input();
+    }
     // Array
     if (currentToken.type == P_ARRAY)
     {
@@ -466,6 +472,14 @@ AST Parser::string()
     if (!eat(T_STR)) return AST(P_NOMATCH, "");
     AST stringNode(T_STR, token.value);
     return stringNode;
+}
+
+AST Parser::input()
+{
+    eat(T_INPUT);
+    AST inputNode(T_INPUT, "");
+    inputNode.left = new AST(expr());
+    return inputNode;
 }
 
 #endif
