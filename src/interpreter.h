@@ -500,7 +500,7 @@ Value Interpreter::visitInput(AST ast)
     getline(cin, input);
 
     // Determine token type
-    regex r_INT("[\\d]");
+    regex r_INT("[\\d]+");
     regex r_FLOAT("[\\d]+.[\\d]+");
     if (regex_match(input, r_INT)) return Value(T_INT, input);
     else if (regex_match(input, r_FLOAT)) return Value(T_FLOAT, input);
