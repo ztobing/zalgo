@@ -437,6 +437,11 @@ AST Parser::factor()
         if (!eat(T_RPAREN)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: ')'"); // Throw exception
         return ast;
     }
+    // Array
+    if (currentToken.type == T_LBRACKET)
+    {
+        return arrayStatement();
+    }
     // Variable
     if (currentToken.type == T_VAR)
     {
@@ -451,11 +456,6 @@ AST Parser::factor()
     if (currentToken.type == T_INPUT)
     {
         return input();
-    }
-    // Array
-    if (currentToken.type == P_ARRAY)
-    {
-        return arrayStatement();
     }
 
     return AST(P_NOMATCH, "");
