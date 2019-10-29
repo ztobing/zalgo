@@ -70,9 +70,20 @@ AST Parser::genAST()
 
 void Parser::printInOrder(AST ast)
 {
-    if (ast.left != NULL) printInOrder(*ast.left);
-    cout << ast.value << endl;
-    if (ast.right != NULL) printInOrder(*ast.right);
+    cout << "Current: " << ast.value << endl;
+    if (ast.left != NULL) 
+    {
+        cout << "Visit Left" << endl;
+        printInOrder(*ast.left);
+    }
+
+    cout <<"Back to " << ast.value << endl;
+
+    if (ast.right != NULL) 
+    {
+        cout << "Visit Right" << endl;
+        printInOrder(*ast.right);
+    }
 }
 
 bool Parser::eat(int type)
@@ -174,8 +185,8 @@ AST Parser::statement()
     if (statementNode.type != P_NOMATCH) return statementNode;
 
     // Call Statement
-    statementNode = callStatement();
-    if (statementNode.type != P_NOMATCH) return statementNode;
+    // statementNode = callStatement();
+    // if (statementNode.type != P_NOMATCH) return statementNode;
 
     // Print Statement
     statementNode = printStatement();
@@ -252,7 +263,7 @@ AST Parser::assignStatement()
 AST Parser::callStatement()
 {
     Lexer l = this->lexer;
-    if (!(l.next == T_VAR && l.next == T_LPAREN)) return AST(P_NOMATCH, "");
+    // if (!(l.next == T_VAR && l.next == T_LPAREN)) return AST(P_NOMATCH, "");
     Token varToken = currentToken;
     eat(T_VAR);
     eat(T_LPAREN);
@@ -495,10 +506,10 @@ AST Parser::factor()
         return arrayStatement();
     }
     // Function Call
-    {
-        Lexer l = this->lexer;
-        if ((l.next == T_VAR && l.next == T_LPAREN)) return callStatement();
-    }
+    // {
+    //     Lexer l = this->lexer;
+    //     if ((l.next == T_VAR && l.next == T_LPAREN)) return callStatement();
+    // }
     // Variable
     if (currentToken.type == T_VAR)
     {
