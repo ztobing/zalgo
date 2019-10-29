@@ -8,6 +8,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <regex>
 #include <math.h>
 
 #include "token.h"
@@ -34,6 +35,7 @@ class Interpreter
         Value visitInt(AST);
         Value visitFloat(AST);
         Value visitString(AST);
+        Value visitInput(AST);
         Value visitPrint(AST);
     public:
         Interpreter(AST);
@@ -71,6 +73,7 @@ Value Interpreter::visit(AST ast)
         case T_FLOAT:           return visitFloat(ast);
         case T_VAR:             return visitVar(ast);
         case T_STR:             return visitString(ast);
+        case T_INPUT:           return visitInput(ast);
         case P_ARRAY:           return visitArray(ast);
         case T_PRINT:           return visitPrint(ast);
         default:                break;
@@ -487,6 +490,21 @@ Value Interpreter::visitString(AST ast)
     ; // Throw exception
 
     return Value(T_STR, ast.value);
+}
+
+Value Interpreter::visitInput(AST ast)
+{
+    string input;
+    string prompt = ast.left->value;
+    cout << endl << prompt;
+    getline(cin, input);
+
+    // Determine token type
+    regex r_INT("[\\d]");
+    regex r_FLOAT("[\\d]+.[\\d]+");
+    if (regex_match(input, r_INT)) return Value(T_INT, input);
+    else if (regex_match(input, r_FLOAT)) return Value(T_FLOAT, input);
+    return Value(T_STR, input);
 }
 
 Value Interpreter::visitArray(AST ast)
