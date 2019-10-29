@@ -9,6 +9,7 @@
 #define P_FUNCTION 105
 #define P_FUNCPARAM 106
 #define P_IFACTIONS 107
+#define P_CALL 108
 
 #include <iostream>
 
@@ -31,6 +32,7 @@ class Parser
         AST exprList();
         AST statement();
         AST assignStatement();
+        AST callStatement();
         AST ifStatement();
         AST arrayStatement();
         AST forStatement();
@@ -172,6 +174,8 @@ AST Parser::statement()
     if (statementNode.type != P_NOMATCH) return statementNode;
 
     // Call Statement
+    statementNode = callStatement();
+    if (statementNode.type != P_NOMATCH) return statementNode;
 
     // Print Statement
     statementNode = printStatement();
@@ -243,6 +247,38 @@ AST Parser::assignStatement()
         return functionNode;
     }
     return AST(P_NOMATCH, "");
+}
+
+AST Parser::callStatement()
+{
+    Lexer l = this->lexer;
+    if (!(l.next == T_VAR && l.next == T_LPAREN)) return AST(P_NOMATCH, "");
+    Token varToken = currentToken;
+    eat(T_VAR);
+    eat(T_LPAREN);
+    AST paramsNode;
+    if (peek(T_VAR))
+    {
+        Token paramToken = currentToken;
+        eat(T_VAR);
+        AST paramNode(paramToken.type, paramToken.value);
+        paramNode.left = new AST(paramsNode);
+        paramsNode = paramNode;
+        
+        while (currentToken.type == T_COMMA)
+        {
+            eat(T_COMMA);
+            Token paramToken = currentToken;
+            if (!eat(T_VAR)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: 'param'");;
+            AST paramNode(paramToken.type, paramToken.value);
+            paramNode.left = new AST(paramsNode);
+            paramsNode = paramNode;
+        }
+    }
+    if (!eat(T_RPAREN)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: ')'"); // Throw exception
+    AST callNode(P_CALL, varToken.value);
+    callNode.left = new AST(paramsNode);
+    return callNode;
 }
 
 AST Parser::ifStatement()
@@ -457,6 +493,11 @@ AST Parser::factor()
     if (currentToken.type == T_LBRACKET)
     {
         return arrayStatement();
+    }
+    // Function Call
+    {
+        Lexer l = this->lexer;
+        if ((l.next == T_VAR && l.next == T_LPAREN)) return callStatement();
     }
     // Variable
     if (currentToken.type == T_VAR)
