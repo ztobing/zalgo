@@ -133,6 +133,7 @@ Value Interpreter::visitFor(AST ast)
             GLOBAL_SCOPE[ast.value] = Value(T_INT, to_string(i));
             visit(AST(operation));
         }
+        GLOBAL_SCOPE.erase(GLOBAL_SCOPE.find(ast.value));
     }
     return Value(I_COMPLETE, "");
 }
