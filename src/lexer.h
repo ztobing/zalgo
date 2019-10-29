@@ -562,7 +562,7 @@ bool Lexer::eof()
 
 void Lexer::pushCurrentToken()
 {
-    if (currentTokenType != T_NONE)
+    if (currentTokenType != T_NONE && currentTokenType != T_COMMENT)
         tokens.push_back(Token(currentTokenLine, currentTokenCol, currentLineContent, currentTokenType, currentTokenValue));
     currentTokenType = T_NONE;
     currentTokenValue = "";
