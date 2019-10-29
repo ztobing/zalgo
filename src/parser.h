@@ -94,7 +94,7 @@ AST Parser::program()
     // cout << "program START" << endl;
 
     AST programNode = statementList();
-    if (!eat(T_EOF)) cout << "EOF NOT FOUND" << endl; // Throw exception
+    if (!eat(T_EOF)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: 'eof'"); // Throw exception
     return programNode;
 }
 
@@ -212,20 +212,17 @@ AST Parser::assignStatement()
         Token funcToken = currentToken;
         eat(T_VAR);
         AST functionNode(P_FUNCTION, funcToken.value);
-        if (!eat(T_LPAREN))
-        ; // Throw exception
+        if (!eat(T_LPAREN)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: '('"); // Throw exception
         if (peek(T_VAR))
         {
             // Add parameter processing
         }
-        if (!eat(T_RPAREN))
-        ; // Throw exception
-        if (!eat(T_COMMANDNEND))
-        ; // Throw exception
+        if (!eat(T_RPAREN)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: ')'"); // Throw exception
+        if (!eat(T_COMMANDNEND))SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: '\n'"); // Throw exception
         // functionNode.left = new AST(); // Add parameter list
         functionNode.right = new AST(statementList());
-        if (!eat(T_END)) cout << "END NOT FOUND" << endl; // Throw exception
-        if (!eat(T_FUNC)) cout << "END_FUNC NOT FOUND" << endl; // Throw exception
+        if (!eat(T_END)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: 'end'"); // Throw exception
+        if (!eat(T_FUNC)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: 'func'"); // Throw exception
         return functionNode;
     }
     return AST(P_NOMATCH, "");
@@ -350,8 +347,7 @@ AST Parser::expr()
     while (currentToken.type == T_OPR && (currentToken.value == "+" || currentToken.value == "-"))
     {
         Token token = currentToken;
-        if (!eat(T_OPR))
-        ; // Throw exception
+        if (!eat(T_OPR))SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: '" + currentToken.value + "'"); // Throw exception
         AST newExprNode(token.type, token.value);
         newExprNode.left = new AST(exprNode);
         newExprNode.right = new AST(term());
@@ -371,8 +367,7 @@ AST Parser::term()
     while (currentToken.type == T_OPR && (currentToken.value == "*" || currentToken.value == "/"))
     {
         Token token = currentToken;
-        if (!eat(T_OPR))
-        ; // Throw exception
+        if (!eat(T_OPR)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: '" + currentToken.value + "'"); // Throw exception
         AST newTermNode(token.type, token.value);
         newTermNode.left = new AST(termNode);
         newTermNode.right = new AST(factor());
@@ -392,8 +387,7 @@ AST Parser::factor()
     // Unary plus/minus
     if (currentToken.type == T_OPR && (currentToken.value == "+" || currentToken.value == "-"))
     {
-        if (!eat(T_OPR))
-        ; // Throw exception
+        if (!eat(T_OPR)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: '" + currentToken.value + "'"); // Throw exception
         AST ast(T_OPR, token.value);
         ast.left = new AST(factor());
         return ast;
@@ -401,27 +395,23 @@ AST Parser::factor()
     // Integer
     if (currentToken.type == T_INT)
     {
-        if (!eat(T_INT))
-        ; // Throw exception
+        if (!eat(T_INT))SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: 'int'"); // Throw exception
         AST ast(T_INT, token.value);
         return ast;
     }
     // Float
     if (currentToken.type == T_FLOAT)
     {
-        if (!eat(T_FLOAT))
-        ; // Throw exception
+        if (!eat(T_FLOAT)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: 'float'"); // Throw exception
         AST ast(T_FLOAT, token.value);
         return ast;
     }
     // Parentheses
     if (currentToken.type == T_LPAREN)
     {
-        if (!eat(T_LPAREN))
-        ; // Throw exception
+        if (!eat(T_LPAREN)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: '('"); // Throw exception
         AST ast = expr();
-        if (!eat(T_RPAREN))
-        ; // Throw exception
+        if (!eat(T_RPAREN)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: ')'"); // Throw exception
         return ast;
     }
     // Variable
@@ -441,7 +431,7 @@ AST Parser::factor()
     }
 
     // Unknown
-    // Throw exception
+    SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: 'no match'"); // Throw exception
     return AST(P_NOMATCH, "");
 }
 
