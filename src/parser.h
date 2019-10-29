@@ -434,6 +434,12 @@ AST Parser::factor()
     {
         return string();
     }
+    // Array
+    if (currentToken.type == P_ARRAY)
+    {
+        return arrayStatement();
+    }
+
     // Unknown
     // Throw exception
     return AST(P_NOMATCH, "");
