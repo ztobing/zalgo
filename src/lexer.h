@@ -104,11 +104,6 @@ void Lexer::add(char c, string currentLineContent, int line, int col)
     currentCol = col;
     currentTokenCount++;
 
-    // !! Temporary code !!
-    // cout << "CHECK " << c << endl;
-    // cout << "CURRENT " << currentTokenType << endl;
-    // cout << "        " << currentTokenValue << endl;
-
     // Process input according to the lexer order of precedence
     if (parseComment(c, currentLineContent, line, col)) return;
     if (parseString(c, currentLineContent, line, col)) return;
@@ -552,13 +547,6 @@ bool Lexer::eof()
 {
     return tokens.empty();
 }
-
-// void Lexer::resetCurrentToken()
-// {
-//     currentTokenType = T_NONE;
-//     currentTokenValue = "";
-//     return;
-// }
 
 void Lexer::pushCurrentToken()
 {
