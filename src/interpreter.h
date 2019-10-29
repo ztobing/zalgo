@@ -496,7 +496,7 @@ Value Interpreter::visitInput(AST ast)
 {
     string input;
     string prompt = ast.left->value;
-    cout << endl << prompt;
+    cout << prompt;
     getline(cin, input);
 
     // Determine token type
