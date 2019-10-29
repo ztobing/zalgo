@@ -7,7 +7,8 @@
 #define P_EXPRLIST 103
 #define P_ARRAY 104
 #define P_FUNCTION 105
-#define P_IFACTIONS 106
+#define P_FUNCPARAM 106
+#define P_IFACTIONS 107
 
 #include <iostream>
 
@@ -214,13 +215,28 @@ AST Parser::assignStatement()
         eat(T_VAR);
         AST functionNode(P_FUNCTION, funcToken.value);
         if (!eat(T_LPAREN)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: '('"); // Throw exception
+        AST paramsNode(T_NONE, "");
         if (peek(T_VAR))
         {
-            // Add parameter processing
+            Token paramToken = currentToken;
+            eat(T_VAR);
+            AST paramNode(paramToken.type, paramToken.value);
+            paramNode.left = new AST(paramsNode);
+            paramsNode = paramNode;
+            
+            while (currentToken.type == T_COMMA)
+            {
+                eat(T_COMMA);
+                Token paramToken = currentToken;
+                if (!eat(T_VAR)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: 'param'");;
+                AST paramNode(paramToken.type, paramToken.value);
+                paramNode.left = new AST(paramsNode);
+                paramsNode = paramNode;
+            }
         }
         if (!eat(T_RPAREN)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: ')'"); // Throw exception
         if (!eat(T_COMMANDNEND))SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: 'eol'"); // Throw exception
-        // functionNode.left = new AST(); // Add parameter list
+        functionNode.left = new AST(paramsNode); // Add parameter list
         functionNode.right = new AST(statementList());
         if (!eat(T_END)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: 'end'"); // Throw exception
         if (!eat(T_FUNC)) SyntaxError(currentToken.line, currentToken.col, currentToken.lineContent, "Expected: 'func'"); // Throw exception
