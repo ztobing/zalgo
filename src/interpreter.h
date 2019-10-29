@@ -28,6 +28,7 @@ class Interpreter
         Value visitExprList(AST);
         Value visitAssign(AST);
         Value visitIf(AST);
+        Value visitFor(AST);
         Value visitWhile(AST);
         Value visitCompare(AST);
         Value visitOpr(AST);
@@ -65,6 +66,7 @@ Value Interpreter::visit(AST ast)
         case P_EXPRLIST:        return visitExprList(ast);
         case T_ASSIGN:          return visitAssign(ast);
         case T_IF:              return visitIf(ast);
+        case T_FOR:             return visitFor(ast);
         case T_WHILE:           return visitWhile(ast);
         case T_BINCMP:
         case T_BITCMP:          return visitCompare(ast);
@@ -117,6 +119,22 @@ Value Interpreter::visitIf(AST ast)
         return Value(I_COMPLETE, "");
     }
     return visit(*ast.right->left);
+}
+
+Value Interpreter::visitFor(AST ast)
+{
+    AST condition = *ast.left;
+    AST operation = *ast.right;
+
+    if (condition.type == T_TO)
+    {
+        for (int i = stoi(condition.left->value); i != stoi(condition.right->value); stoi(condition.left->value) < stoi(condition.right->value) ? i++ : i-- )
+        {
+            GLOBAL_SCOPE[ast.value] = Value(T_INT, to_string(i));
+            visit(AST(operation));
+        }
+    }
+    return Value(I_COMPLETE, "");
 }
 
 Value Interpreter::visitWhile(AST ast)
