@@ -4,6 +4,12 @@ An interpreter for a basic, simple and easy to use scripting language.
 
 A final project for Analysis of Algorithms class.
 
+Made by
+- David Amadeo - [GitHub](https://github.com/davidamadeo)
+- Eris Suryaputra - [GitHub](https://github.com/GetLiberatedSon)
+- Livander Surya
+- Zefanya G - [GitHub](https://github.com/zefryuuko)
+
 ## Compilation
 To compile, you need a C++ compiler installed on your machine. Once installed, clone this repository and run terminal in the cloned repository's directory. After that, run
 ```
