@@ -7,7 +7,7 @@ A final project for Analysis of Algorithms class.
 Made by
 - David Amadeo - [GitHub](https://github.com/davidamadeo)
 - Eris Suryaputra - [GitHub](https://github.com/GetLiberatedSon)
-- Livander Surya
+- Livander Surya - [GitHub](https://github.com/leagrove197)
 - Zefanya G - [GitHub](https://github.com/zefryuuko)
 
 ## Compilation
